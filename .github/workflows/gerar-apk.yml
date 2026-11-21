@@ -1,0 +1,58 @@
+name: Gerar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Criar projeto Android
+        run: |
+          npx cap add android
+          npx cap sync android
+          # trava o jogo em modo retrato
+          sed -i 's/android:name=".MainActivity"/android:name=".MainActivity" android:screenOrientation="portrait"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../masmorra-idle.apk
+
+      - name: Guardar APK nos artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: masmorra-idle-apk
+          path: masmorra-idle.apk
+
+      - name: Publicar APK em Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Masmorra Idle (build ${{ github.run_number }})
+          body: APK gerado automaticamente. Baixe o arquivo masmorra-idle.apk abaixo e instale no Android.
+          files: masmorra-idle.apk

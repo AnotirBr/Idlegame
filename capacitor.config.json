@@ -1,0 +1,9 @@
+{
+  "appId": "com.anotirbr.masmorraidle",
+  "appName": "Masmorra Idle",
+  "webDir": "www",
+  "backgroundColor": "#09080c",
+  "android": {
+    "allowMixedContent": false
+  }
+}
