@@ -32,6 +32,7 @@ jobs:
       - name: Criar projeto Android
         run: |
           npx cap add android
+          npx capacitor-assets generate --android --iconBackgroundColor '#1a1028' --splashBackgroundColor '#09080c'
           npx cap sync android
           # trava o jogo em modo retrato
           sed -i 's/android:name=".MainActivity"/android:name=".MainActivity" android:screenOrientation="portrait"/' android/app/src/main/AndroidManifest.xml
@@ -41,18 +42,18 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../masmorra-idle.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../runa-eterna.apk
 
       - name: Guardar APK nos artefatos
         uses: actions/upload-artifact@v4
         with:
-          name: masmorra-idle-apk
-          path: masmorra-idle.apk
+          name: runa-eterna-apk
+          path: runa-eterna.apk
 
       - name: Publicar APK em Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Masmorra Idle (build ${{ github.run_number }})
-          body: APK gerado automaticamente. Baixe o arquivo masmorra-idle.apk abaixo e instale no Android.
-          files: masmorra-idle.apk
+          name: Runa Eterna (build ${{ github.run_number }})
+          body: APK gerado automaticamente. Baixe o arquivo runa-eterna.apk abaixo e instale no Android.
+          files: runa-eterna.apk

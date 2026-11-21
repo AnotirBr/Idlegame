@@ -1,6 +1,6 @@
-# Masmorra Idle: como gerar o APK com modo online
+# Runa Eterna: como gerar o APK com modo online
 
-Este guia transforma o `masmorra-idle.html` num app Android com chat, ranking, guildas, amigos e chefe de guilda funcionando de verdade, além de notificações.
+Este guia transforma o `index.html do jogo` num app Android com chat, ranking, guildas, amigos e chefe de guilda funcionando de verdade, além de notificações.
 
 Você vai precisar de:
 - um computador com **Node.js** (versão 18 ou mais nova);
@@ -14,17 +14,17 @@ Você vai precisar de:
 No terminal:
 
 ```bash
-mkdir masmorra-idle && cd masmorra-idle
+mkdir runa-eterna && cd runa-eterna
 npm init -y
 npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/local-notifications
-npx cap init "Masmorra Idle" com.seunome.masmorraidle --web-dir www
+npx cap init "Runa Eterna" com.seunome.runaeterna --web-dir www
 mkdir www
 ```
 
 Copie o arquivo do jogo para dentro da pasta `www`, com o nome `index.html`:
 
 ```bash
-cp /caminho/para/masmorra-idle.html www/index.html
+cp /caminho/para/index.html do jogo www/index.html
 ```
 
 ---

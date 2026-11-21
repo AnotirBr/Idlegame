@@ -1,4 +1,6 @@
-# Masmorra Idle: Crônicas Pixel
+# Runa Eterna: Idle RPG
+
+![Runa Eterna](assets/logo.png)
 
 RPG idle em pixel art 2D: 8 classes, 16 subclasses, 128 habilidades, 14 regiões, masmorras, Torre Infinita, pets, visuais, bestiário, runas, guildas e chat.
 
@@ -10,6 +12,7 @@ capacitor.config.json             configuração do app Android
 package.json                      dependências do Capacitor
 .github/workflows/gerar-apk.yml   gera o APK a cada envio para a main
 .github/workflows/github-pages.yml publica o jogo no navegador
+assets/                           logo, ícone e tela de abertura do app
 COMO_GERAR_APK.md                 guia completo (Firebase, notificações, compras)
 ```
 
@@ -17,7 +20,7 @@ COMO_GERAR_APK.md                 guia completo (Firebase, notificações, compr
 
 Cada envio para a branch `main` dispara o workflow **Gerar APK**. Em uns 5 minutos o arquivo aparece em:
 
-- **Releases** (lado direito da página do repositório): baixe `masmorra-idle.apk` direto no celular e instale. O Android vai pedir para permitir "instalar apps desconhecidos".
+- **Releases** (lado direito da página do repositório): baixe `runa-eterna.apk` direto no celular e instale. O Android vai pedir para permitir "instalar apps desconhecidos".
 - **Actions › Gerar APK › execução mais recente › Artifacts**, como alternativa.
 
 Para gerar de novo sem mudar nada: **Actions › Gerar APK › Run workflow**.
