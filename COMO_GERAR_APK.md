@@ -71,6 +71,16 @@ service cloud.firestore {
     match /guilds/{id}   { allow read: if signed(); allow write: if signed() && !hardBan(); allow delete: if gm() || (signed() && !hardBan()); }
     match /gboss/{id}    { allow read, write: if signed() && !hardBan(); }
     match /gdmg/{id}     { allow read: if signed(); allow write: if signed() && !hardBan() && request.resource.data.u == request.auth.uid; }
+    match /market/{id} {
+      allow read: if signed();
+      allow create: if signed() && !hardBan() && request.resource.data.s == request.auth.uid && request.resource.data.p >= 5;
+      allow delete: if signed() && !hardBan();
+    }
+    match /sales/{id} {
+      allow read: if signed() && resource.data.to == request.auth.uid;
+      allow create: if signed() && !hardBan();
+      allow delete: if signed() && resource.data.to == request.auth.uid;
+    }
     match /gifts/{id} {
       allow read: if signed();
       allow create: if signed() && !hardBan() && request.resource.data.from == request.auth.uid;
