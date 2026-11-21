@@ -1599,8 +1599,8 @@ const NET={ok:false,loading:true,db:null,user:null,uid:null,owner:false,chat:[],
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>new Date().toISOString().slice(0,10);
 /* Para o APK: cole aqui a configuração do seu projeto Firebase (veja o guia). Deixe null para desativar. */
-const FIREBASE_CONFIG=null;
-function loadJs(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+const FIREBASE_CONFIG={apiKey:"AIzaSyAf3YqipBOL3fwh7pXjEAOu-pLPTmI-WtA",authDomain:"runa-eterna.firebaseapp.com",projectId:"runa-eterna",storageBucket:"runa-eterna.firebasestorage.app",messagingSenderId:"264431176191",appId:"1:264431176191:web:df2042271b3682e21c3fca"};
+function loadJs(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Não foi possível baixar o Firebase. Verifique a internet.'));document.head.appendChild(s)})}
 async function fbInit(){const v='10.12.2',b=`https://www.gstatic.com/firebasejs/${v}/`;await loadJs(b+'firebase-app-compat.js');await loadJs(b+'firebase-auth-compat.js');await loadJs(b+'firebase-firestore-compat.js');
  firebase.initializeApp(FIREBASE_CONFIG);const cred=await firebase.auth().signInAnonymously();return{db:firebase.firestore(),user:{id:async()=>cred.user.uid,isOwner:()=>false}}}
 async function netInit(){try{let db,user;
@@ -1611,10 +1611,10 @@ async function netInit(){try{let db,user;
  const uid=await user.id();if(!uid){NET.loading=false;socialDirty();return}
  NET.db=db;NET.user=user;NET.uid=uid;NET.ok=true;NET.loading=false;try{NET.owner=!!user.isOwner()}catch(e){}
  if(!S.nick)S.nick=((S.heroes[0]&&S.heroes[0].name)||'Herói')+ri(10,99);
- db.collection('chat').where('ch','==','g').orderBy('ts','desc').limit(50).onSnapshot(s=>{const old=NET.chat.length;NET.chat=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();if(old&&NET.chat.length&&!(tab==='social'&&socTab==='chat'))NET.unread++;onChat()},()=>{});
+ db.collection('chat').orderBy('ts','desc').limit(150).onSnapshot(s=>{NET.allChat=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();splitChat()},e=>{NET.err=String(e&&e.message||e);socialDirty()});
  db.collection('players').where('fr','array-contains',uid).onSnapshot(s=>{NET.inReq=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{});
  db.collection('gifts').where('to','==',uid).onSnapshot(s=>{NET.gifts=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{});
- if(S.guild)subGuild();await refreshPlayers(true);syncProfile(true);socialDirty()}catch(e){NET.loading=false;socialDirty()}}
+ if(S.guild)subGuild();await refreshPlayers(true);syncProfile(true);socialDirty()}catch(e){NET.loading=false;NET.err=String(e&&(e.code||e.message)||e);socialDirty()}}
 function myProfile(){const pw=B.heroes.reduce((a,u)=>a+power(u.st),0),main=S.heroes[0];
  return{n:S.nick,c:main?main.cls:'warrior',sb:main&&main.sub||'',lv:Math.max(0,...S.heroes.map(h=>h.lvl)),pw:Math.floor(pw),ms:S.maxStage,rn:S.runes,g:S.guild||'',fr:S.friends.slice(0,50),gc:Math.floor(S.gcon||0),hs:S.heroes.map(h=>h.cls),tw:S.tw.max,ti:S.title||''}}
 async function syncProfile(force){if(!NET.ok)return;const p=myProfile(),k=JSON.stringify(p);if(!force&&k===NET.lastSync&&Date.now()-NET.lastSyncT<18e4)return;NET.lastSync=k;NET.lastSyncT=Date.now();
@@ -1631,7 +1631,8 @@ function gbHTML(){if(!GB.loaded||GB.wk!==weekKey()){gbLoad();return'<div class="
  <div class="mut" style="font-size:15px">Todos atacam o mesmo chefe durante a semana (3 ataques de 30s por dia). Se ele cair, quem atacou ganha 40 gemas, ovo, item e chance de visual.</div>
  ${GB.dmg.slice(0,5).map((x,i)=>`<div class="row" style="font-size:16px"><span class="pos p${i+1}">${i+1}</span><span class="sp">${esc(x.n)}</span><span class="g">${fmt(x.dmg)}</span></div>`).join('')}
  <div class="btns">${dead?`<button class="btn gld ${claimed?'dis':''}" data-a="gbclaim">${claimed?'Recompensa coletada':'Pegar recompensa'}</button>`:`<button class="btn red ${gbAttLeft()<1||S.ch?'dis':''}" data-a="gbattack">Atacar (${gbAttLeft()}/3 hoje)</button>`}</div>`}
-function subGuild(){if(NET.gsub){NET.gsub();NET.gsub=null}NET.gchat=[];if(!NET.ok||!S.guild)return;NET.gsub=NET.db.collection('chat').where('ch','==','g:'+S.guild).orderBy('ts','desc').limit(40).onSnapshot(s=>{NET.gchat=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();onChat()},()=>{})}
+function splitChat(){const all=NET.allChat||[],old=NET.chat.length,last=old?NET.chat[old-1].id:'';NET.chat=all.filter(m=>m.ch==='g').slice(-50);NET.gchat=S.guild?all.filter(m=>m.ch==='g:'+S.guild).slice(-40):[];if(old&&NET.chat.length&&NET.chat[NET.chat.length-1].id!==last&&!(tab==='social'&&socTab==='chat'))NET.unread++;onChat()}
+function subGuild(){splitChat()}
 let sending=false;
 async function sendChat(ch){const inp=$('#chatIn');if(!inp||!NET.ok||sending)return;const t=inp.value.trim().slice(0,140);if(!t)return;sending=true;inp.value='';SND.play('click');
  try{await NET.db.collection('chat').add({ch,u:NET.uid,n:S.nick,ti:S.title||'',t,ts:Date.now(),c:(S.heroes[0]||{}).cls||'warrior',lv:Math.max(...S.heroes.map(h=>h.lvl))});
@@ -1640,13 +1641,14 @@ function onChat(){const el=$('#chatList');if(el){const list=socTab==='guilda'?NE
 function chatHTML(list){if(!list.length)return'<div class="mut" style="text-align:center;padding:14px">Nenhuma mensagem ainda. Diga olá!</div>';
  return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${m.ti?` <small class="g">«${esc(m.ti)}»</small>`:''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.owner&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
 let socTab='chat',rankBy='ms';
+function chatErr(){return NET.err?`<div class="rd" style="font-size:15px">Erro do servidor: ${esc(NET.err).slice(0,200)}</div>`:''}
 function socialDirty(){const a=document.activeElement;if(tab==='social'&&!(a&&(a.id==='chatIn'||a.tagName==='INPUT')))renderPanel();hudDirty=true}
 function tabSocial(){
  const tabs=`<div class="tabs">${[['chat','Chat','scroll','#e8d8b0'],['rank','Ranking','crown','#ffd34a'],['guilda','Guilda','shield','#3a6ad8'],['amigos','Amigos','heart','#e2445a']].map(([k,n,g,c])=>`<button class="${socTab===k?'on':''}" data-a="soctab" data-v="${k}"><img src="${icon(g,c)}">${n}${k==='amigos'&&pendingReq().length+NET.gifts.length?'<i class="dot" style="position:static;margin-left:2px"></i>':''}</button>`).join('')}</div>`;
  if(NET.loading)return`<div class="fr pnl"><h3>SOCIAL</h3><div class="mut" style="padding:14px;text-align:center">Conectando ao reino...</div></div>`;
- if(!NET.ok)return`<div class="fr pnl"><h3>SOCIAL</h3>${tabs}<div style="font-size:18px;padding:6px 2px">Os recursos online (chat, ranking, guildas e amigos) precisam de conexão com o servidor do jogo.<br><br><span class="mut">Nesta cópia eles estão indisponíveis: isso acontece quando o jogo é aberto fora do link hospedado (por exemplo, como APK ou arquivo local), ou sem login. No APK é preciso ligar um servidor próprio (ex.: Firebase).</span></div></div>`;
+ if(!NET.ok)return`<div class="fr pnl"><h3>SOCIAL</h3>${tabs}<div style="font-size:18px;padding:6px 2px">Os recursos online (chat, ranking, guildas e amigos) precisam de conexão com o servidor do jogo.<br><br><span class="mut">Nesta cópia eles estão indisponíveis: isso acontece quando o jogo é aberto fora do link hospedado (por exemplo, como APK ou arquivo local), ou sem login. No APK é preciso ligar um servidor próprio (ex.: Firebase).</span>${NET.err?`<br><br><span class="rd">Erro ao conectar: ${esc(NET.err).slice(0,200)}</span>`:''}</div></div>`;
  let o=`<div class="fr pnl"><h3>SOCIAL</h3><div class="row" style="margin-bottom:8px;font-size:18px"><span>Seu nome: <b class="g">${esc(S.nick)}</b></span><span class="sp"></span><button class="btn sm gry" data-a="nick">Mudar</button></div>${tabs}`;
- if(socTab==='chat')o+=`<div id="chatList" class="chat">${chatHTML(NET.chat)}</div><div class="row chatbar"><input id="chatIn" maxlength="140" placeholder="Escreva para todos..." autocomplete="off"><button class="btn sm" data-a="send" data-v="g">Enviar</button></div><div class="mut" style="font-size:15px;margin-top:4px">Chat público entre todos que jogam por este link. Seja gentil!</div>`;
+ if(socTab==='chat')o+=chatErr()+`<div id="chatList" class="chat">${chatHTML(NET.chat)}</div><div class="row chatbar"><input id="chatIn" maxlength="140" placeholder="Escreva para todos..." autocomplete="off"><button class="btn sm" data-a="send" data-v="g">Enviar</button></div><div class="mut" style="font-size:15px;margin-top:4px">Chat público entre todos que jogam por este link. Seja gentil!</div>`;
  if(socTab==='rank'){refreshPlayers();const key=rankBy;const list=NET.players.slice().sort((a,b)=>(b[key]||0)-(a[key]||0));const myPos=list.findIndex(p=>p.id===NET.uid)+1;
   o+=`<div class="tabs">${[['ms','Fase'],['pw','Poder'],['tw','Torre'],['lv','Nível']].map(([k,n])=>`<button class="${rankBy===k?'on':''}" data-a="rankby" data-v="${k}">${n}</button>`).join('')}</div>`;
   const gl=NET.guilds.map(g=>guildInfo(g.id)).filter(Boolean);

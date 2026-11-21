@@ -31,7 +31,7 @@ Uma vez só: **Settings › Pages › Build and deployment › Source: GitHub Ac
 
 ## Modo online (chat, ranking, guildas, amigos)
 
-No APK e no GitHub Pages, o modo online precisa do Firebase. Cole a configuração do seu projeto em `www/index.html`, no lugar de `const FIREBASE_CONFIG=null;`, seguindo o passo 2 do `COMO_GERAR_APK.md`.
+O modo online usa o projeto Firebase `runa-eterna`, já configurado em `www/index.html`.
 
 ## Atualizar o jogo
 
