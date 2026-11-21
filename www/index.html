@@ -229,6 +229,12 @@ input[type=range]{padding:0;box-shadow:none;border:none;background:transparent}
 
 #logo #wm{height:30px;width:auto;filter:drop-shadow(0 2px 0 #000)}
 .logo-big{display:block;width:100%;max-width:320px;margin:0 auto 6px}
+
+.ann{margin:4px 6px 0;padding:4px 8px;background:linear-gradient(90deg,#5a1010,#2a0808);border:2px solid #000;box-shadow:inset 0 0 0 1px #e2443c;font-size:17px;display:flex;align-items:center;gap:6px}
+.ann span{flex:1}.ann i{font-style:normal;cursor:pointer;color:#ff9a8a;padding:0 4px}
+.gmb{display:inline-block;font-family:'Press Start 2P';font-size:7px;color:#fff;background:#c82a2a;padding:2px 3px 1px;box-shadow:0 0 0 1px #000;vertical-align:2px}
+textarea{width:100%;font-family:'VT323';font-size:18px;background:#0b090c;color:#fff;border:2px solid #000;box-shadow:inset 0 0 0 1px #5a3c22;padding:4px 6px;resize:vertical;user-select:text;-webkit-user-select:text}
+.gmf{display:grid;grid-template-columns:1fr 1fr;gap:6px}.gmf label{display:flex;flex-direction:column;font-size:15px;color:var(--mut);gap:2px}.gmf select,.gmf input{width:100%}
 </style>
 </head>
 <body>
@@ -244,6 +250,7 @@ input[type=range]{padding:0;box-shadow:none;border:none;background:transparent}
   </div>
  </header>
  <div id="sbar"><div id="stg">Fase 1-1</div><button class="btn red sm" id="bBoss" data-a="boss">CHEFE!</button><button class="btn blu sm" id="bSpd" data-a="speed">x1</button><button class="btn gry sm" id="bMini" data-a="mini">▣</button></div>
+ <div id="ann" class="ann" style="display:none"></div>
  <div id="battle" class="fr s"><div id="bwrap"><canvas id="cv" width="512" height="288"></canvas><div id="fx"></div></div></div>
  <div id="party"></div>
  <main id="panel"></main>
@@ -967,11 +974,11 @@ function fmt(n){n=+n||0;const neg=n<0;n=Math.abs(n);let s;if(n<1000)s=n<10&&n%1?
 const pct=v=>(Math.round(v*1000)/10)+'%';
 const G=1.035;let UID=Date.now()%1e6;const uid=()=>++UID;
 const KEY='masmorra_idle_v2',KEY1='masmorra_idle_v1';const KEYMAX=5,KEYREG=18e5;
-function fresh(){return{v:2,gold:0,gems:30,runes:0,frag:0,stage:1,wave:1,maxStage:1,farm:false,heroes:[],inv:[],up:{str:0,vit:0,arm:0,gold:0,xp:0,luck:0},st:{kills:0,bosses:0,levels:0,enh:0,loot:0,skills:0,goldT:0,prest:0},q:[],opt:{auto:-1,spd:1,sfx:1,mus:1,vol:.6},sel:0,last:Date.now(),boostG:0,boostX:0,keys:3,keyT:Date.now(),dun:null,dlv:{},nick:'',guild:'',friends:[],gcon:0,guildLv:0,tut:0,gift:{},ess:0,rn:{},best:{},troph:{},regDone:{},cos:[],pets:{},pet:'',eggs:0,bag:40,bagN:0,prot:0,useProt:0,day:{d:'',drops:0},login:{n:0,c:''},dq:null,wq:null,ev:null,ach:{},title:'',tw:{max:0},gbAtt:{d:'',n:0},gbClaim:'',merch:null,ch:null}}
+function fresh(){return{v:2,gold:0,gems:30,runes:0,frag:0,stage:1,wave:1,maxStage:1,farm:false,heroes:[],inv:[],up:{str:0,vit:0,arm:0,gold:0,xp:0,luck:0},st:{kills:0,bosses:0,levels:0,enh:0,loot:0,skills:0,goldT:0,prest:0},q:[],opt:{auto:-1,spd:1,sfx:1,mus:1,vol:.6},sel:0,last:Date.now(),boostG:0,boostX:0,keys:3,keyT:Date.now(),dun:null,dlv:{},nick:'',guild:'',friends:[],gcon:0,guildLv:0,tut:0,gift:{},ess:0,rn:{},best:{},troph:{},regDone:{},cos:[],pets:{},pet:'',eggs:0,bag:40,bagN:0,prot:0,useProt:0,day:{d:'',drops:0},login:{n:0,c:''},dq:null,wq:null,ev:null,ach:{},title:'',tw:{max:0},gbAtt:{d:'',n:0},gbClaim:'',merch:null,ch:null,owner:'',offline:0,gclaim:{},annSeen:0}}
 let S=fresh();
 function save(){S.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function fixItem(it){if(!it)return it;if(!it.t||!ITY[it.s][it.t]){it.t=pick(Object.keys(ITY[it.s]));it.n=ITY[it.s][it.t].n+' '+pick(ISUF)}return it}
-function load(){try{let t=localStorage.getItem(KEY)||localStorage.getItem(KEY1);if(!t)return false;const o=JSON.parse(t),f=fresh();S=Object.assign(f,o);S.v=2;S.up=Object.assign(fresh().up,o.up);S.st=Object.assign(fresh().st,o.st);S.opt=Object.assign(fresh().opt,o.opt);S.dlv=o.dlv||{};S.friends=o.friends||[];S.gift=o.gift||{};if(o.v<3)S.tut=99;if(!o.v||o.v<4){S.ess=(o.runes||0)*3;S.runes=0}S.v=4;S.ch=null;delete S.dun;['rn','best','troph','regDone','pets','ach'].forEach(k=>S[k]=o[k]||{});S.cos=o.cos||[];S.tw=o.tw||{max:0};S.login=o.login||{n:0,c:''};S.bag=Math.max(o.bag||40,Math.ceil(S.inv.length/10)*10);
+function load(){try{let t=localStorage.getItem(KEY)||localStorage.getItem(KEY1);if(!t)return false;const o=JSON.parse(t),f=fresh();S=Object.assign(f,o);S.v=2;S.up=Object.assign(fresh().up,o.up);S.st=Object.assign(fresh().st,o.st);S.opt=Object.assign(fresh().opt,o.opt);S.dlv=o.dlv||{};S.friends=o.friends||[];S.gift=o.gift||{};if(o.v<3)S.tut=99;if(!o.v||o.v<4){S.ess=(o.runes||0)*3;S.runes=0}S.v=4;S.ch=null;delete S.dun;['rn','best','troph','regDone','pets','ach'].forEach(k=>S[k]=o[k]||{});S.cos=o.cos||[];S.gclaim=o.gclaim||{};S.tw=o.tw||{max:0};S.login=o.login||{n:0,c:''};S.bag=Math.max(o.bag||40,Math.ceil(S.inv.length/10)*10);
  S.inv.forEach(fixItem);S.heroes.forEach(h=>SLOTS.forEach(s=>fixItem(h.eq[s])));return true}catch(e){return false}}
 /* ================= FORMULAS ================= */
 const Lv=()=>(S.stage-1)*10+S.wave;
@@ -1348,7 +1355,7 @@ function itemModal(id){const f=findItem(id);if(!f)return closeM();const it=f.it,
  ${(it.tr||[]).length?`<div class="traits">${it.tr.map(x=>`<div><img src="${icon(TR[x.id].i,TR[x.id].c)}"><b>${TR[x.id].n}</b> ${TR[x.id].d(x.q)}</div>`).join('')}${it.r===6?`<div><img src="${icon('star','#ff4ad8')}"><b class="c6">Aura Ancestral</b> +10% ATQ, VIDA e DEF e brilho arco-íris</div>`:''}</div>`:''}
  <div class="stats" style="margin-top:8px">${rows}<div><img src="${icon('espada',4)}"><span>PODER</span><b>${fmt(itemPow(it))}</b></div></div>
  ${cur?`<div class="mut" style="font-size:16px;margin-top:4px">Comparando com o equipado em ${h.name}: <span class="c${cur.r}">${cur.n}</span></div>`:''}<div class="btns">${b}</div>`)}
-function settingsModal(){modal(`<h2>Opções</h2><div style="font-size:18px">O progresso é salvo automaticamente neste aparelho.</div>
+function settingsModal(){modal(`<h2>Opções</h2>${NET.fb?(NET.ok?`<div class="li"><div class="tx"><b>${esc(S.nick)}</b>${gmBadge(NET.uid)}<br><span class="mut">${esc(NET.email)} · salvo na nuvem</span></div><button class="btn sm red" data-a="logout">Sair</button></div>`:`<div class="li"><div class="tx"><b>Jogando offline</b><br><span class="mut">Progresso só neste aparelho</span></div><button class="btn sm gld" data-a="loginopen">Entrar</button></div>`):'<div style="font-size:18px">O progresso é salvo automaticamente neste aparelho.</div>'}
  <div class="btns"><button class="btn ${S.opt.sfx?'':'gry'}" data-a="tsfx">Efeitos: ${S.opt.sfx?'ON':'OFF'}</button><button class="btn ${S.opt.mus?'':'gry'}" data-a="tmus">Música: ${S.opt.mus?'ON':'OFF'}</button></div>
  <div class="row" style="margin-top:8px">Volume <input type="range" id="volIn" min="0" max="1" step=".05" value="${S.opt.vol}" style="flex:1"></div>
  <div class="btns"><button class="btn blu" data-a="speed">Velocidade: x${S.opt.spd}</button><button class="btn blu" data-a="pip">Janela flutuante</button><button class="btn blu" data-a="mini">Modo compacto</button></div>
@@ -1419,12 +1426,12 @@ let last=performance.now(),acc=0,hidT=0,saveT=0;
 function loop(t){const dt=Math.min(.1,(t-last)/1000);last=t;
  if(S.heroes.length){const step=dt*S.opt.spd,n=Math.ceil(step/.02);for(let i=0;i<n;i++)update(step/n)}else T+=dt;
  ambient(dt);draw();if(tab==='herois')drawPreview();
- acc+=dt;saveT+=dt;if(acc>.25){acc=0;hud();if((panelDirty&&tab!=='social')||(invDirty&&tab==='inv'))renderPanel()}if(saveT>10){saveT=0;save();syncProfile()}
+ acc+=dt;saveT+=dt;if(acc>.25){acc=0;hud();if((panelDirty&&tab!=='social')||(invDirty&&tab==='inv'))renderPanel()}if(saveT>10){saveT=0;save();syncProfile();cloudSave()}
  requestAnimationFrame(loop)}
 function scheduleNotifs(){try{const LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;if(!LN||!S.heroes.length)return;const capH=8+metaBonus().off,list=[{id:1,title:'Runa Eterna',body:'Seus heróis lotaram as recompensas offline. Volte para coletar!',schedule:{at:new Date(Date.now()+capH*36e5)}}];
  if(keysNow()<KEYMAX)list.push({id:2,title:'Chaves recarregadas',body:'Suas chaves de masmorra estão cheias!',schedule:{at:new Date(S.keyT+(KEYMAX-S.keys)*KEYREG)}});if(S.inv.length>=S.bag-5)list.push({id:3,title:'Bolsa quase cheia',body:'Venda ou desmonte itens para não perder loot.',schedule:{at:new Date(Date.now()+36e5)}});
  (LN.requestPermissions?LN.requestPermissions():Promise.resolve()).catch(()=>{}).then(()=>LN.cancel({notifications:[{id:1},{id:2},{id:3}]})).catch(()=>{}).finally(()=>LN.schedule({notifications:list}).catch(()=>{}))}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(document.hidden){hidT=Date.now();save();scheduleNotifs()}else if(hidT){const s=(Date.now()-hidT)/1000;hidT=0;last=performance.now();if(!PIP)offlineReward(s)}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hidT=Date.now();save();scheduleNotifs();cloudSave(true)}else if(hidT){const s=(Date.now()-hidT)/1000;hidT=0;last=performance.now();if(!PIP)offlineReward(s)}});
 let bgLast=Date.now();setInterval(()=>{const n=Date.now(),dt=Math.min(2,(n-bgLast)/1000);bgLast=n;if(document.hidden&&PIP&&S.heroes.length){const step=dt*S.opt.spd,k=Math.ceil(step/.03);for(let i=0;i<k;i++)update(step/k);draw()}},200);
 window.addEventListener('pagehide',save);window.addEventListener('resize',resize);
 
@@ -1459,7 +1466,8 @@ const ACH=[['k1','Primeiro Sangue','Derrote 100 inimigos',()=>S.st.kills>=100,5,
 /* ---- helpers ---- */
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function weekKey(d=new Date()){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fy=new Date(Date.UTC(t.getUTCFullYear(),0,4));return t.getUTCFullYear()+'w'+(1+Math.round(((t-fy)/864e5-3+((fy.getUTCDay()+6)%7))/7))}
-function curEvent(){const d=new Date().getDay();if(!(d===5||d===6||d===0))return null;return EVS[parseInt(weekKey().split('w')[1])%EVS.length]}
+let EVO=null;
+function curEvent(){if(EVO&&EVO.until>Date.now()){const e=EVS.find(x=>x.id===EVO.id);if(e)return e}const d=new Date().getDay();if(!(d===5||d===6||d===0))return null;return EVS[parseInt(weekKey().split('w')[1])%EVS.length]}
 let MB=null;
 function metaBonus(){if(MB)return MB;const b={atk:0,hp:0,def:0,gold:0,xp:0,luck:0,cdmg:0,aspd:0,crit:0,drop:0,forge:0,off:0,heal:0};
  if(typeof S==='undefined'||!S.rn)return b;
@@ -1569,7 +1577,7 @@ function missLogin(){const st=loginState();return`<div class="li"><div class="ic
 function missDaily(){questRoll();const row=(q,i,kind)=>{const p=qP(q),done=p>=q.n&&!q.ok;return`<div class="li"><div class="ico"><img src="${icon(QT[q.k][1],QT[q.k][2])}"></div><div class="tx"><b>${QT[q.k][0].replace('{n}',fmt(q.n))}</b><div class="prog"><i style="width:${p/q.n*100}%"></i></div><span class="mut">${fmt(p)}/${fmt(q.n)} · ${kind==='d'?fmt(q.gold)+' ouro'+(q.key?' + 1 chave':''):q.gems+' gemas + 1 ovo'}</span></div><button class="btn sm ${q.ok?'gry dis':done?'gld':'gry dis'}" data-a="qclaim" data-v="${kind}${i}">${q.ok?'Feito':'Pegar'}</button></div>`};
  return`<h3>DIÁRIAS</h3>${S.dq.list.map((q,i)=>row(q,i,'d')).join('')}<h3 style="margin-top:8px">SEMANAIS</h3>${S.wq.list.map((q,i)=>row(q,i,'w')).join('')}`}
 function missEvent(){questRoll();const ev=curEvent();if(!ev)return`<div style="font-size:18px">Nenhum evento agora. Os eventos acontecem de <b>sexta a domingo</b>, cada semana um diferente:</div>`+EVS.map(e=>`<div class="li"><div class="tx"><b>${e.n}</b><br><span class="mut">${e.d}</span></div></div>`).join('');
- return`<div class="evb"><b>${ev.n}</b><br>${ev.d} · até domingo</div>`+EVT.map(([k,t,n])=>{const p=Math.min(n,S.ev.p[k]||0),got=S.ev.got[k];return`<div class="li"><div class="tx"><b>${t}</b><div class="prog"><i style="width:${p/n*100}%"></i></div><span class="mut">${fmt(p)}/${fmt(n)} · 15 gemas</span></div><button class="btn sm ${got?'gry dis':p>=n?'gld':'gry dis'}" data-a="evclaim" data-v="${k}">${got?'Feito':'Pegar'}</button></div>`}).join('')+
+ return`<div class="evb"><b>${ev.n}</b><br>${ev.d} · ${EVO&&EVO.until>Date.now()?'até '+new Date(EVO.until).toLocaleString('pt-BR'):'até domingo'}</div>`+EVT.map(([k,t,n])=>{const p=Math.min(n,S.ev.p[k]||0),got=S.ev.got[k];return`<div class="li"><div class="tx"><b>${t}</b><div class="prog"><i style="width:${p/n*100}%"></i></div><span class="mut">${fmt(p)}/${fmt(n)} · 15 gemas</span></div><button class="btn sm ${got?'gry dis':p>=n?'gld':'gry dis'}" data-a="evclaim" data-v="${k}">${got?'Feito':'Pegar'}</button></div>`}).join('')+
  `<div class="li"><div class="tx"><b>Complete as 3 tarefas</b><br><span class="mut">Visual raro + 20 gemas</span></div><button class="btn sm ${S.ev.got.all?'gry dis':EVT.every(([k])=>S.ev.got[k])?'gld':'gry dis'}" data-a="evclaim" data-v="all">${S.ev.got.all?'Feito':'Pegar'}</button></div>`}
 function missAch(){return`<div class="row" style="font-size:18px;margin-bottom:6px">Título: <b class="g">${S.title||'—'}</b></div>`+ACH.map(([id,n,d,fn,gm,ti])=>{const ok=fn(),got=S.ach[id];return`<div class="li"><div class="ico"><img src="${icon('crown',got?'#ffd34a':ok?'#5cd65c':'#5a5a5a')}"></div><div class="tx"><b>${n}</b><br><span class="mut">${d} · ${gm} gemas · título “${ti}”</span></div>${got?`<button class="btn sm ${S.title===ti?'gld':'gry'}" data-a="title" data-v="${ti}">${S.title===ti?'Usando':'Usar título'}</button>`:`<button class="btn sm ${ok?'gld':'gry dis'}" data-a="achclaim" data-v="${id}">Pegar</button>`}</div>`}).join('')}
 /* ---- ações ---- */
@@ -1601,20 +1609,78 @@ const today=()=>new Date().toISOString().slice(0,10);
 /* Para o APK: cole aqui a configuração do seu projeto Firebase (veja o guia). Deixe null para desativar. */
 const FIREBASE_CONFIG={apiKey:"AIzaSyAf3YqipBOL3fwh7pXjEAOu-pLPTmI-WtA",authDomain:"runa-eterna.firebaseapp.com",projectId:"runa-eterna",storageBucket:"runa-eterna.firebasestorage.app",messagingSenderId:"264431176191",appId:"1:264431176191:web:df2042271b3682e21c3fca"};
 function loadJs(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Não foi possível baixar o Firebase. Verifique a internet.'));document.head.appendChild(s)})}
-async function fbInit(){const v='10.12.2',b=`https://www.gstatic.com/firebasejs/${v}/`;await loadJs(b+'firebase-app-compat.js');await loadJs(b+'firebase-auth-compat.js');await loadJs(b+'firebase-firestore-compat.js');
- firebase.initializeApp(FIREBASE_CONFIG);const cred=await firebase.auth().signInAnonymously();return{db:firebase.firestore(),user:{id:async()=>cred.user.uid,isOwner:()=>false}}}
-async function netInit(){try{let db,user;
- if(window.claude&&typeof window.claude.use==='function'){[db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')])}
- else if(FIREBASE_CONFIG){({db,user}=await fbInit())}
- else{NET.loading=false;socialDirty();return}
- if(!db||!user){NET.loading=false;socialDirty();return}
- const uid=await user.id();if(!uid){NET.loading=false;socialDirty();return}
- NET.db=db;NET.user=user;NET.uid=uid;NET.ok=true;NET.loading=false;try{NET.owner=!!user.isOwner()}catch(e){}
+let AUTH=null,LOGIN_OPEN=false,BOOTWAIT=false;
+async function fbLoad(){const v='10.12.2',b=`https://www.gstatic.com/firebasejs/${v}/`;await loadJs(b+'firebase-app-compat.js');await loadJs(b+'firebase-auth-compat.js');await loadJs(b+'firebase-firestore-compat.js');if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG)}
+async function netInit(){try{
+ if(window.claude&&typeof window.claude.use==='function'){const[db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+  if(!db||!user){NET.loading=false;socialDirty();bootFlow();return}const uid=await user.id();if(!uid){NET.loading=false;socialDirty();bootFlow();return}
+  NET.db=db;NET.user=user;try{NET.owner=NET.gm=!!user.isOwner()}catch(e){}await netStart(uid);bootFlow();return}
+ if(FIREBASE_CONFIG){await fbLoad();NET.db=firebase.firestore();AUTH=firebase.auth();NET.fb=true;AUTH.onAuthStateChanged(u=>onAuth(u));return}
+ NET.loading=false;socialDirty();bootFlow()}catch(e){NET.loading=false;NET.err=String(e&&(e.code||e.message)||e);socialDirty();offlineFallback()}}
+function offlineFallback(){if(LOGIN_OPEN){LOGIN_OPEN=false;closeM()}if(NET.fb||FIREBASE_CONFIG)toast('Sem conexão com o servidor: jogando offline.');bootFlow()}
+function bootFlow(){if(BOOTWAIT){BOOTWAIT=false;closeM()}if(S.heroes.length){if(!B.heroes.length){rebuildParty();spawnWave()}renderPanel();hud();return}if(!LOGIN_OPEN)modal(classPick(true),true)}
+async function onAuth(u){if(!u){unsubAll();NET.ok=false;NET.uid=null;NET.gm=false;NET.loading=false;socialDirty();if(S.offline){bootFlow();return}if(BOOTWAIT)BOOTWAIT=false;showLogin('in');return}
+ if(LOGIN_OPEN){LOGIN_OPEN=false;closeM()}NET.email=u.email||'';S.offline=0;
+ await loadCloud(u.uid);if(NET.pendingNick){S.nick=NET.pendingNick;NET.pendingNick=''}
+ try{NET.gm=(await NET.db.doc('admins/'+u.uid).get()).exists}catch(e){NET.gm=false}
+ await netStart(u.uid);bootFlow();toast(NET.gm?'Bem-vindo, <b class="rd">Game Master</b>!':`Conectado como <b class="g">${esc(S.nick)}</b>`)}
+function unsubAll(){(NET.subs||[]).forEach(f=>{try{f()}catch(e){}});NET.subs=[]}
+async function netStart(uid){NET.uid=uid;NET.ok=true;NET.loading=false;const db=NET.db;unsubAll();
  if(!S.nick)S.nick=((S.heroes[0]&&S.heroes[0].name)||'Herói')+ri(10,99);
- db.collection('chat').orderBy('ts','desc').limit(150).onSnapshot(s=>{NET.allChat=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();splitChat()},e=>{NET.err=String(e&&e.message||e);socialDirty()});
- db.collection('players').where('fr','array-contains',uid).onSnapshot(s=>{NET.inReq=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{});
- db.collection('gifts').where('to','==',uid).onSnapshot(s=>{NET.gifts=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{});
- if(S.guild)subGuild();await refreshPlayers(true);syncProfile(true);socialDirty()}catch(e){NET.loading=false;NET.err=String(e&&(e.code||e.message)||e);socialDirty()}}
+ NET.subs.push(db.collection('chat').orderBy('ts','desc').limit(150).onSnapshot(s=>{NET.allChat=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();NET.err='';splitChat()},e=>{NET.err=String(e&&(e.code||e.message)||e);socialDirty()}));
+ NET.subs.push(db.collection('players').where('fr','array-contains',uid).onSnapshot(s=>{NET.inReq=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{}));
+ NET.subs.push(db.collection('gifts').where('to','==',uid).onSnapshot(s=>{NET.gifts=s.docs.map(d=>Object.assign({id:d.id},d.data()));socialDirty()},()=>{}));
+ NET.subs.push(db.collection('grants').where('to','in',[uid,'all']).onSnapshot(s=>{NET.grants=s.docs.map(d=>Object.assign({id:d.id},d.data()));checkGrants()},()=>{}));
+ NET.subs.push(db.doc('config/announce').onSnapshot(d=>{NET.ann=d.exists?d.data():null;showAnn()},()=>{}));
+ NET.subs.push(db.doc('config/event').onSnapshot(d=>{EVO=d.exists?d.data():null;hudDirty=true;if(tab==='miss')renderPanel()},()=>{}));
+ NET.subs.push(db.doc('bans/'+uid).onSnapshot(d=>{NET.ban=d.exists?d.data():null;socialDirty()},()=>{}));
+ try{const a=await db.collection('admins').get();NET.gms=new Set(a.docs.map(d=>d.id))}catch(e){NET.gms=new Set()}if(NET.gm)NET.gms.add(uid);
+ if(S.guild)subGuild();await refreshPlayers(true);syncProfile(true);socialDirty()}
+/* ---- save na nuvem ---- */
+async function loadCloud(uid){if(!NET.fb)return;try{const d=await NET.db.doc('saves/'+uid).get();
+ if(d.exists){const c=JSON.parse(d.data().s||'{}');if(S.owner!==uid||(c.last||0)>(S.last||0))applySave(c,uid)}
+ else{if(S.owner&&S.owner!==uid)applySave(null,uid);S.owner=uid;NET.uid=uid;NET.ok=true;await cloudSave(true)}}catch(e){toast('Não foi possível carregar o save da nuvem.')}}
+function applySave(o,uid){try{if(o)localStorage.setItem(KEY,JSON.stringify(o));else localStorage.removeItem(KEY)}catch(e){}
+ if(o){if(!load())S=Object.assign(fresh(),o)}else S=fresh();S.owner=uid;MB=null;B.heroes=[];B.enemies=[];if(S.heroes.length){rebuildParty();spawnWave()}else buildPartyBars();renderPanel();hud()}
+let cloudT=0;
+async function cloudSave(force){if(!NET.fb||!NET.ok||!NET.uid||S.owner!==NET.uid)return;if(!force&&Date.now()-cloudT<60000)return;cloudT=Date.now();S.last=Date.now();
+ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{await NET.db.doc('saves/'+NET.uid).set({s:JSON.stringify(S),ts:Date.now(),v:S.v})}catch(e){}}
+/* ---- tela de login ---- */
+const AUTHERR={'auth/invalid-email':'E-mail inválido.','auth/user-not-found':'Conta não encontrada.','auth/wrong-password':'Senha incorreta.','auth/invalid-credential':'E-mail ou senha incorretos.','auth/invalid-login-credentials':'E-mail ou senha incorretos.','auth/email-already-in-use':'Esse e-mail já tem conta. Use Entrar.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/operation-not-allowed':'Login por e-mail desativado no Firebase (ative E-mail/senha em Authentication).','auth/network-request-failed':'Sem internet. Tente de novo.','auth/too-many-requests':'Muitas tentativas. Espere alguns minutos.','auth/missing-password':'Digite a senha.'};
+const authMsg=e=>AUTHERR[e&&e.code]||('Erro: '+(e&&(e.code||e.message)||e));
+function showLogin(mode){LOGIN_OPEN=true;const up=mode==='up';
+ modal(`<img class="logo-big" src="${LOGO}"><div class="tabs"><button class="${up?'':'on'}" data-a="loginmode" data-v="in">Entrar</button><button class="${up?'on':''}" data-a="loginmode" data-v="up">Criar conta</button></div>
+ ${up?'<div>Apelido no jogo</div><input id="lgNick" maxlength="14" autocomplete="nickname" style="width:100%">':''}
+ <div style="margin-top:4px">E-mail</div><input id="lgMail" type="email" autocomplete="email" style="width:100%">
+ <div style="margin-top:4px">Senha</div><input id="lgPass" type="password" autocomplete="${up?'new-password':'current-password'}" style="width:100%">
+ <div id="lgErr" class="rd" style="font-size:16px;min-height:18px;margin-top:4px"></div>
+ <div class="btns"><button class="btn gld" id="lgGo" data-a="${up?'signup':'signin'}">${up?'Criar conta':'Entrar'}</button></div>
+ <div class="btns">${up?'':'<button class="btn sm gry" data-a="pwreset">Esqueci a senha</button>'}<button class="btn sm gry" data-a="playoff">Jogar offline</button></div>
+ <div class="mut" style="font-size:15px">Com uma conta, o progresso fica salvo na nuvem e você joga em qualquer aparelho, com chat, ranking e guildas.</div>`,true)}
+const lgErr=t=>{const e=$('#lgErr');if(e)e.textContent=t};
+/* ---- Game Master ---- */
+let grantT=null;
+function checkGrants(){const g=(NET.grants||[]).filter(x=>!S.gclaim[x.id]).sort((a,b)=>a.ts-b.ts)[0];if(!g)return;if(!S.heroes.length||LOGIN_OPEN||$('#modal').classList.contains('on')){clearTimeout(grantT);grantT=setTimeout(checkGrants,3000);return}
+ S.gclaim[g.id]=1;const res=[];if(g.gems){S.gems+=g.gems;res.push(`${g.gems} gemas`)}if(g.keys){S.keys+=g.keys;res.push(`${g.keys} chaves`)}if(g.eggs){S.eggs+=g.eggs;res.push(`${g.eggs} ovos`)}if(g.gmin){const v=goldKill(Math.max(10,Lv()))*0.3*60*g.gmin;S.gold+=v;res.push(`${fmt(v)} ouro`)}
+ if(g.item){const it=mkItem(pick(SLOTS),clamp(g.item|0,0,6),Math.max(10,Lv()));addItem(it,true);res.push(`<span class="c${it.r}">${it.n}</span>`)}
+ reveal('Presente do Game Master',icon('crown','#e2443c'),[{r:4,html:`<div style="font-size:18px">${g.msg?`“${esc(g.msg)}”<br><br>`:''}${res.join('<br>')||'Uma mensagem para você!'}</div>`}]);save();cloudSave(true);setTimeout(checkGrants,4000)}
+function showAnn(){const el=$('#ann');if(!el)return;const a=NET.ann;if(!a||!a.t||Date.now()-a.ts>3*864e5||S.annSeen===a.ts){el.style.display='none';return}el.style.display='';el.innerHTML=`<img src="${icon('crown','#e2443c')}" class="ti"> <span>${esc(a.t)}</span><i data-a="annx">✕</i>`}
+const isGM=id=>NET.gms&&NET.gms.has(id);
+const gmBadge=id=>isGM(id)?' <span class="gmb">GM</span>':'';
+function gmHTML(){if(!NET.gm)return'<div class="mut">Acesso restrito.</div>';const pl=NET.players.slice().sort((a,b)=>(a.n||'').localeCompare(b.n||''));const evo=EVO&&EVO.until>Date.now()?EVS.find(e=>e.id===EVO.id):null;
+ return`<div class="evb"><b>PAINEL DO GAME MASTER</b><br>Tudo o que você faz aqui vale para todos os jogadores.</div>
+ <h3>ANÚNCIO GLOBAL</h3><textarea id="gmAnn" maxlength="200" rows="3">${esc(NET.ann&&NET.ann.t||'')}</textarea><div class="btns"><button class="btn sm gld" data-a="gmann">Publicar anúncio</button><button class="btn sm gry" data-a="gmannclr">Remover</button></div>
+ <h3 style="margin-top:8px">ENVIAR PRESENTE</h3>
+ <div class="gmf"><label>Para<select id="gmTo"><option value="all">Todos os jogadores</option>${pl.map(p=>`<option value="${esc(p.id)}">${esc(p.n)}</option>`).join('')}</select></label>
+ <label>Gemas<input id="gmGem" type="number" min="0" value="0"></label><label>Chaves<input id="gmKey" type="number" min="0" value="0"></label><label>Ovos<input id="gmEgg" type="number" min="0" value="0"></label><label>Ouro (min de farm)<input id="gmGold" type="number" min="0" value="0"></label>
+ <label>Item<select id="gmItem"><option value="">Nenhum</option>${RAR.map((r,i)=>`<option value="${i}">${r.n}</option>`).join('')}</select></label><label>Mensagem<input id="gmMsg" maxlength="120"></label></div>
+ <div class="btns"><button class="btn sm blu" data-a="gmgrant">Enviar presente</button></div>
+ <h3 style="margin-top:8px">EVENTO</h3><div style="font-size:17px">${evo?`Ativo: <b class="g">${evo.n}</b> até ${new Date(EVO.until).toLocaleString('pt-BR')}`:'Nenhum evento forçado (o automático roda de sexta a domingo).'}</div>
+ <div class="gmf"><label>Evento<select id="gmEv">${EVS.map(e=>`<option value="${e.id}">${e.n} (${e.d})</option>`).join('')}</select></label><label>Duração (horas)<input id="gmEvH" type="number" min="1" max="168" value="24"></label></div>
+ <div class="btns"><button class="btn sm pur" data-a="gmevent">Iniciar evento</button>${evo?'<button class="btn sm gry" data-a="gmevend">Encerrar</button>':''}</div>
+ <h3 style="margin-top:8px">JOGADORES <span>${pl.length}</span></h3>${pl.map(p=>`<div class="li" data-a="pcard" data-v="${esc(p.id)}"><span class="onl ${p.ts&&Date.now()-p.ts<3e5?'y':''}"></span><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}<br><span class="mut">Fase ${p.ms|0} · Poder ${fmt(p.pw||0)}</span></div></div>`).join('')}
+ <div class="mut" style="font-size:14px;margin-top:6px">Toque num jogador para silenciar ou banir. No chat, toque no ✕ para apagar mensagens.</div>`}
+function banState(b){return b&&b.until>Date.now()?b:null}
 function myProfile(){const pw=B.heroes.reduce((a,u)=>a+power(u.st),0),main=S.heroes[0];
  return{n:S.nick,c:main?main.cls:'warrior',sb:main&&main.sub||'',lv:Math.max(0,...S.heroes.map(h=>h.lvl)),pw:Math.floor(pw),ms:S.maxStage,rn:S.runes,g:S.guild||'',fr:S.friends.slice(0,50),gc:Math.floor(S.gcon||0),hs:S.heroes.map(h=>h.cls),tw:S.tw.max,ti:S.title||''}}
 async function syncProfile(force){if(!NET.ok)return;const p=myProfile(),k=JSON.stringify(p);if(!force&&k===NET.lastSync&&Date.now()-NET.lastSyncT<18e4)return;NET.lastSync=k;NET.lastSyncT=Date.now();
@@ -1634,25 +1700,26 @@ function gbHTML(){if(!GB.loaded||GB.wk!==weekKey()){gbLoad();return'<div class="
 function splitChat(){const all=NET.allChat||[],old=NET.chat.length,last=old?NET.chat[old-1].id:'';NET.chat=all.filter(m=>m.ch==='g').slice(-50);NET.gchat=S.guild?all.filter(m=>m.ch==='g:'+S.guild).slice(-40):[];if(old&&NET.chat.length&&NET.chat[NET.chat.length-1].id!==last&&!(tab==='social'&&socTab==='chat'))NET.unread++;onChat()}
 function subGuild(){splitChat()}
 let sending=false;
-async function sendChat(ch){const inp=$('#chatIn');if(!inp||!NET.ok||sending)return;const t=inp.value.trim().slice(0,140);if(!t)return;sending=true;inp.value='';SND.play('click');
+async function sendChat(ch){const inp=$('#chatIn');if(!inp||!NET.ok||sending)return;if(banState(NET.ban))return toast('Você está silenciado.');const t=inp.value.trim().slice(0,140);if(!t)return;sending=true;inp.value='';SND.play('click');
  try{await NET.db.collection('chat').add({ch,u:NET.uid,n:S.nick,ti:S.title||'',t,ts:Date.now(),c:(S.heroes[0]||{}).cls||'warrior',lv:Math.max(...S.heroes.map(h=>h.lvl))});
   if(Math.random()<.25){const old=await NET.db.collection('chat').where('ts','<',Date.now()-2*864e5).limit(15).get();for(const d of old.docs){try{await NET.db.doc('chat/'+d.id).delete()}catch(e){}}}}catch(e){toast('Não foi possível enviar (sem permissão de escrita?).')}sending=false}
 function onChat(){const el=$('#chatList');if(el){const list=socTab==='guilda'?NET.gchat:NET.chat;el.innerHTML=chatHTML(list);el.scrollTop=el.scrollHeight;NET.unread=0}hudDirty=true}
 function chatHTML(list){if(!list.length)return'<div class="mut" style="text-align:center;padding:14px">Nenhuma mensagem ainda. Diga olá!</div>';
- return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${m.ti?` <small class="g">«${esc(m.ti)}»</small>`:''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.owner&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
+ return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${gmBadge(m.u)}${m.ti?` <small class="g">«${esc(m.ti)}»</small>`:''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.gm&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
 let socTab='chat',rankBy='ms';
 function chatErr(){return NET.err?`<div class="rd" style="font-size:15px">Erro do servidor: ${esc(NET.err).slice(0,200)}</div>`:''}
 function socialDirty(){const a=document.activeElement;if(tab==='social'&&!(a&&(a.id==='chatIn'||a.tagName==='INPUT')))renderPanel();hudDirty=true}
-function tabSocial(){
- const tabs=`<div class="tabs">${[['chat','Chat','scroll','#e8d8b0'],['rank','Ranking','crown','#ffd34a'],['guilda','Guilda','shield','#3a6ad8'],['amigos','Amigos','heart','#e2445a']].map(([k,n,g,c])=>`<button class="${socTab===k?'on':''}" data-a="soctab" data-v="${k}"><img src="${icon(g,c)}">${n}${k==='amigos'&&pendingReq().length+NET.gifts.length?'<i class="dot" style="position:static;margin-left:2px"></i>':''}</button>`).join('')}</div>`;
+function tabSocial(){if(socTab==='gm'&&!NET.gm)socTab='chat';
+ const tabs=`<div class="tabs">${[['chat','Chat','scroll','#e8d8b0'],['rank','Ranking','crown','#ffd34a'],['guilda','Guilda','shield','#3a6ad8'],['amigos','Amigos','heart','#e2445a']].concat(NET.gm?[['gm','GM','crown','#e2443c']]:[]).map(([k,n,g,c])=>`<button class="${socTab===k?'on':''}" data-a="soctab" data-v="${k}"><img src="${icon(g,c)}">${n}${k==='amigos'&&pendingReq().length+NET.gifts.length?'<i class="dot" style="position:static;margin-left:2px"></i>':''}</button>`).join('')}</div>`;
  if(NET.loading)return`<div class="fr pnl"><h3>SOCIAL</h3><div class="mut" style="padding:14px;text-align:center">Conectando ao reino...</div></div>`;
- if(!NET.ok)return`<div class="fr pnl"><h3>SOCIAL</h3>${tabs}<div style="font-size:18px;padding:6px 2px">Os recursos online (chat, ranking, guildas e amigos) precisam de conexão com o servidor do jogo.<br><br><span class="mut">Nesta cópia eles estão indisponíveis: isso acontece quando o jogo é aberto fora do link hospedado (por exemplo, como APK ou arquivo local), ou sem login. No APK é preciso ligar um servidor próprio (ex.: Firebase).</span>${NET.err?`<br><br><span class="rd">Erro ao conectar: ${esc(NET.err).slice(0,200)}</span>`:''}</div></div>`;
- let o=`<div class="fr pnl"><h3>SOCIAL</h3><div class="row" style="margin-bottom:8px;font-size:18px"><span>Seu nome: <b class="g">${esc(S.nick)}</b></span><span class="sp"></span><button class="btn sm gry" data-a="nick">Mudar</button></div>${tabs}`;
- if(socTab==='chat')o+=chatErr()+`<div id="chatList" class="chat">${chatHTML(NET.chat)}</div><div class="row chatbar"><input id="chatIn" maxlength="140" placeholder="Escreva para todos..." autocomplete="off"><button class="btn sm" data-a="send" data-v="g">Enviar</button></div><div class="mut" style="font-size:15px;margin-top:4px">Chat público entre todos que jogam por este link. Seja gentil!</div>`;
+ if(!NET.ok)return`<div class="fr pnl"><h3>SOCIAL</h3>${tabs}<div style="font-size:18px;padding:6px 2px">Os recursos online (chat, ranking, guildas e amigos) precisam de conexão com o servidor do jogo.<br><br><span class="mut">Nesta cópia eles estão indisponíveis: isso acontece quando o jogo é aberto fora do link hospedado (por exemplo, como APK ou arquivo local), ou sem login. No APK é preciso ligar um servidor próprio (ex.: Firebase).</span>${NET.err?`<br><br><span class="rd">Erro ao conectar: ${esc(NET.err).slice(0,200)}</span>`:''}${NET.fb?'<div class="btns"><button class="btn gld" data-a="loginopen">Entrar ou criar conta</button></div>':''}</div></div>`;
+ let o=`<div class="fr pnl"><h3>SOCIAL</h3><div class="row" style="margin-bottom:8px;font-size:18px"><span>Seu nome: <b class="g">${esc(S.nick)}</b>${gmBadge(NET.uid)}${NET.fb?`<br><span class="mut" style="font-size:14px">ID: ${esc(NET.uid)}</span> <i class="pill" data-a="copyid" style="font-size:13px;cursor:pointer;font-style:normal">copiar</i>`:''}</span><span class="sp"></span><button class="btn sm gry" data-a="nick">Mudar</button></div>${tabs}`;
+ if(socTab==='gm')o+=gmHTML();
+ if(socTab==='chat')o+=chatErr()+`<div id="chatList" class="chat">${chatHTML(NET.chat)}</div>${banState(NET.ban)?`<div class="rd" style="margin-top:6px">Você está silenciado até ${new Date(NET.ban.until).toLocaleString('pt-BR')}.</div>`:`<div class="row chatbar"><input id="chatIn" maxlength="140" placeholder="Escreva para todos..." autocomplete="off"><button class="btn sm" data-a="send" data-v="g">Enviar</button></div>`}<div class="mut" style="font-size:15px;margin-top:4px">Chat público entre todos que jogam por este link. Seja gentil!</div>`;
  if(socTab==='rank'){refreshPlayers();const key=rankBy;const list=NET.players.slice().sort((a,b)=>(b[key]||0)-(a[key]||0));const myPos=list.findIndex(p=>p.id===NET.uid)+1;
   o+=`<div class="tabs">${[['ms','Fase'],['pw','Poder'],['tw','Torre'],['lv','Nível']].map(([k,n])=>`<button class="${rankBy===k?'on':''}" data-a="rankby" data-v="${k}">${n}</button>`).join('')}</div>`;
   const gl=NET.guilds.map(g=>guildInfo(g.id)).filter(Boolean);
-  o+=`<div class="mut" style="font-size:16px;margin-bottom:4px">${list.length} jogadores · sua posição: <b class="g">${myPos||'-'}</b></div>`+list.slice(0,50).map((p,i)=>{const gi=gl.find(g=>g.id===p.g);return`<div class="li rank ${p.id===NET.uid?'me':''}" data-a="pcard" data-v="${esc(p.id)}"><div class="pos p${i+1}">${i+1}</div><div class="ico"><img src="${urlOf(heroFrames(Object.assign(heroLook({id:(p.id||'').length*13,cls:p.c in CLS?p.c:'warrior',sub:SUB[p.sb]?p.sb:null,eq:{}}))).port)}"></div><div class="tx"><b>${esc(p.n)}</b>${gi?` <span class="mut">[${esc(gi.tag)}]</span>`:''}${p.ti?` <small class="g">«${esc(p.ti)}»</small>`:''}<br><span class="mut">${CLS[p.c]?CLS[p.c].n:''} · Nv ${p.lv|0}</span></div><div class="rv g">${key==='pw'?fmt(p.pw):key==='ms'?'Fase '+(p.ms|0):key==='tw'?'Andar '+(p.tw|0):fmt(p[key]||0)}</div></div>`}).join('')+`<div class="btns"><button class="btn sm gry" data-a="refresh">Atualizar</button></div>`;
+  o+=`<div class="mut" style="font-size:16px;margin-bottom:4px">${list.length} jogadores · sua posição: <b class="g">${myPos||'-'}</b></div>`+list.slice(0,50).map((p,i)=>{const gi=gl.find(g=>g.id===p.g);return`<div class="li rank ${p.id===NET.uid?'me':''}" data-a="pcard" data-v="${esc(p.id)}"><div class="pos p${i+1}">${i+1}</div><div class="ico"><img src="${urlOf(heroFrames(Object.assign(heroLook({id:(p.id||'').length*13,cls:p.c in CLS?p.c:'warrior',sub:SUB[p.sb]?p.sb:null,eq:{}}))).port)}"></div><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}${gi?` <span class="mut">[${esc(gi.tag)}]</span>`:''}${p.ti?` <small class="g">«${esc(p.ti)}»</small>`:''}<br><span class="mut">${CLS[p.c]?CLS[p.c].n:''} · Nv ${p.lv|0}</span></div><div class="rv g">${key==='pw'?fmt(p.pw):key==='ms'?'Fase '+(p.ms|0):key==='tw'?'Andar '+(p.tw|0):fmt(p[key]||0)}</div></div>`}).join('')+`<div class="btns"><button class="btn sm gry" data-a="refresh">Atualizar</button></div>`;
   if(gl.length)o+=`<h3 style="margin-top:8px">GUILDAS</h3>`+gl.sort((a,b)=>b.lv-a.lv||b.pw-a.pw).slice(0,10).map((g,i)=>`<div class="li"><div class="pos p${i+1}">${i+1}</div><div class="tx"><b>${esc(g.name)}</b> <span class="mut">[${esc(g.tag)}]</span><br><span class="mut">${g.mem.length} membros · Nv ${g.lv}</span></div><div class="rv g">${fmt(g.pw)}</div></div>`).join('')}
  if(socTab==='guilda'){refreshPlayers();const g=guildInfo(S.guild);
   if(!g){o+=`<div style="font-size:18px;margin-bottom:6px">Entre numa guilda para conversar com o grupo e ganhar <b class="g">+1% de ouro e XP por nível</b> da guilda (até Nv 30).</div><div class="btns"><button class="btn gld" data-a="gcreate">Criar guilda (20K ouro)</button></div><h3 style="margin-top:8px">GUILDAS ABERTAS</h3>`;
@@ -1670,12 +1737,30 @@ function tabSocial(){
   o+=`<h3 style="margin-top:6px">AMIGOS <span>${mine.length}/50</span></h3>`+(mine.length?mine.map(p=>{const mutual=(p.fr||[]).includes(NET.uid),on=p.ts&&Date.now()-p.ts<3e5,sent=S.gift[p.id]===today();return`<div class="li"><span class="onl ${on?'y':''}"></span><div class="tx" data-a="pcard" data-v="${esc(p.id)}"><b>${esc(p.n)}</b>${mutual?'':' <span class="mut">(pedido enviado)</span>'}<br><span class="mut">${on?'Online':'Offline'} · Fase ${p.ms|0} · Poder ${fmt(p.pw||0)}</span></div><button class="btn sm gld ${!mutual||sent?'dis':''}" data-a="gift" data-v="${esc(p.id)}">${sent?'Enviado':'Presentear'}</button></div>`}).join(''):'<div class="mut" style="font-size:17px">Toque no nome de alguém no chat ou no ranking para adicionar como amigo. Amigos podem trocar presentes diários de ouro.</div>')}
  return o+'</div>'}
 const pendingReq=()=>NET.inReq.filter(p=>!S.friends.includes(p.id));
-function playerCard(id){const p=NET.players.find(x=>x.id===id)||NET.inReq.find(x=>x.id===id);if(!p){refreshPlayers(true);return toast('Carregando jogador...')}
+function playerCard(id){setTimeout(async()=>{if(!NET.gm)return;const el=$('#banst');if(!el)return;try{const d=await NET.db.doc('bans/'+id).get();const b=d.exists?banState(d.data()):null;el.innerHTML=b?`<span class="rd">Punido até ${new Date(b.until).toLocaleString('pt-BR')}</span>`:'Sem punições.'}catch(e){el.textContent=''}},50);const p=NET.players.find(x=>x.id===id)||NET.inReq.find(x=>x.id===id);if(!p){refreshPlayers(true);return toast('Carregando jogador...')}
  const g=guildInfo(p.g),isF=S.friends.includes(id),me=id===NET.uid,cls=CLS[p.c]?p.c:'warrior';
  modal(`<div class="row"><img src="${urlOf(heroFrames(heroLook({id:id.length*13,cls,sub:SUB[p.sb]?p.sb:null,eq:{}})).idle[0])}" style="width:72px;height:72px"><div class="sp"><h2 style="margin:0">${esc(p.n)}</h2>${CLS[cls].n}${SUB[p.sb]?' › '+SUB[p.sb].n:''} · Nv ${p.lv|0}${g?`<br>Guilda: <span class="g">${esc(g.name)}</span>`:''}</div></div>
  <div class="stats" style="margin-top:8px"><div><img src="${icon('map','#e8d8b0')}"><span>Fase máx</span><b>${p.ms|0}</b></div><div><img src="${icon('espada',4)}"><span>Poder</span><b>${fmt(p.pw||0)}</b></div><div><img src="${icon('up','#4ab0ff')}"><span>Torre</span><b>${p.tw|0}</b></div><div><img src="${icon('swords','#cfd6e0')}"><span>Heróis</span><b>${(p.hs||[]).length}</b></div></div>
+ ${NET.gm&&!me?`<div id="banst" class="mut" style="margin-top:6px">Verificando punições...</div><div class="btns"><button class="btn sm red" data-a="gmban" data-v="${esc(id)}:1">Silenciar 24h</button><button class="btn sm red" data-a="gmban" data-v="${esc(id)}:30">Banir 30 dias</button><button class="btn sm gry" data-a="gmunban" data-v="${esc(id)}">Perdoar</button></div>`:''}
  <div class="btns">${me?'':isF?`<button class="btn red" data-a="frem" data-v="${esc(id)}">Remover amigo</button>`:`<button class="btn" data-a="fadd" data-v="${esc(id)}">Adicionar amigo</button>`}<button class="btn gry" data-a="close">Fechar</button></div>`)}
 Object.assign(ACT,{
+ loginopen:()=>showLogin('in'),loginmode:v=>showLogin(v),
+ signin:async()=>{const m=($('#lgMail').value||'').trim(),p=$('#lgPass').value||'';if(!m||!p)return lgErr('Preencha e-mail e senha.');lgErr('Entrando...');try{await AUTH.signInWithEmailAndPassword(m,p)}catch(e){lgErr(authMsg(e))}},
+ signup:async()=>{const n=($('#lgNick').value||'').trim().replace(/\s+/g,' ').slice(0,14),m=($('#lgMail').value||'').trim(),p=$('#lgPass').value||'';if(n.length<3)return lgErr('O apelido precisa ter pelo menos 3 letras.');if(!m||p.length<6)return lgErr('Preencha o e-mail e uma senha de 6+ caracteres.');lgErr('Criando conta...');
+  try{const prev=S.owner;await AUTH.createUserWithEmailAndPassword(m,p);if(!prev||prev===AUTH.currentUser.uid)S.nick=n;else NET.pendingNick=n}catch(e){lgErr(authMsg(e))}},
+ pwreset:async()=>{const m=($('#lgMail').value||'').trim();if(!m)return lgErr('Digite seu e-mail para receber o link.');try{await AUTH.sendPasswordResetEmail(m);lgErr('Enviamos um link de nova senha para o seu e-mail.')}catch(e){lgErr(authMsg(e))}},
+ playoff:()=>{S.offline=1;LOGIN_OPEN=false;closeM();bootFlow();save()},
+ logout:async()=>{closeM();await cloudSave(true);unsubAll();NET.ok=false;S=fresh();S.offline=0;try{localStorage.removeItem(KEY)}catch(e){}B.heroes=[];B.enemies=[];buildPartyBars();renderPanel();try{await AUTH.signOut()}catch(e){}},
+ copyid:()=>{try{navigator.clipboard.writeText(NET.uid);toast('ID copiado!')}catch(e){toast('Não foi possível copiar.')}},
+ annx:()=>{S.annSeen=NET.ann&&NET.ann.ts;showAnn();save()},
+ gmann:async()=>{const t=($('#gmAnn').value||'').trim().slice(0,200);if(!t)return;try{await NET.db.doc('config/announce').set({t,ts:Date.now(),by:NET.uid});toast('Anúncio publicado!')}catch(e){toast('Sem permissão de GM.')}},
+ gmannclr:async()=>{try{await NET.db.doc('config/announce').delete();toast('Anúncio removido.')}catch(e){toast('Sem permissão de GM.')}},
+ gmgrant:async()=>{const n=id=>Math.max(0,Math.min(100000,parseInt($(id).value)||0));const g={to:$('#gmTo').value,gems:n('#gmGem'),keys:n('#gmKey'),eggs:n('#gmEgg'),gmin:n('#gmGold'),msg:($('#gmMsg').value||'').slice(0,120),ts:Date.now(),by:NET.uid};const it=$('#gmItem').value;if(it!=='')g.item=+it;
+  if(!g.gems&&!g.keys&&!g.eggs&&!g.gmin&&g.item==null&&!g.msg)return toast('Escolha algo para enviar.');try{await NET.db.collection('grants').add(g);toast('Presente enviado!');SND.play('coin')}catch(e){toast('Sem permissão de GM.')}},
+ gmevent:async()=>{const h=Math.max(1,Math.min(168,parseInt($('#gmEvH').value)||24));try{await NET.db.doc('config/event').set({id:$('#gmEv').value,until:Date.now()+h*36e5,by:NET.uid});toast('Evento iniciado para todos!')}catch(e){toast('Sem permissão de GM.')}},
+ gmevend:async()=>{try{await NET.db.doc('config/event').delete();toast('Evento encerrado.')}catch(e){toast('Sem permissão de GM.')}},
+ gmban:async v=>{const[id,d]=v.split(':');try{await NET.db.doc('bans/'+id).set({until:Date.now()+(+d)*864e5,by:NET.uid,ts:Date.now()});toast(+d>1?'Jogador banido por 30 dias.':'Jogador silenciado por 24h.');playerCard(id)}catch(e){toast('Sem permissão de GM.')}},
+ gmunban:async v=>{try{await NET.db.doc('bans/'+v).delete();toast('Punição removida.');playerCard(v)}catch(e){toast('Sem permissão de GM.')}},
  soctab:v=>{socTab=v;renderPanel();if(v==='chat'||v==='guilda'){const el=$('#chatList');if(el)el.scrollTop=el.scrollHeight;NET.unread=0}},
  rankby:v=>{rankBy=v;renderPanel()},refresh:()=>refreshPlayers(true),
  send:v=>sendChat(v),
@@ -1693,7 +1778,7 @@ Object.assign(ACT,{
  gjoin:async v=>{const g=guildInfo(v);if(!g||g.mem.length>=20)return;S.guild=v;S.gcon=0;subGuild();await syncProfile(true);await refreshPlayers(true);toast('Você entrou na guilda '+esc(g.name)+'!');save()},
  gleave:async()=>{S.guild='';S.gcon=0;S.guildLv=0;subGuild();await syncProfile(true);await refreshPlayers(true);save()},
  gdonate:v=>{v=+v;if(S.gold<v)return;S.gold-=v;S.gcon=(S.gcon||0)+v;SND.play('coin');syncProfile(true);refreshPlayers(true);save()}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='chatIn'){const b=document.querySelector('[data-a=send]');if(b)sendChat(b.dataset.v)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='lgPass'||e.target.id==='lgMail')){const b=$('#lgGo');if(b)b.click();return}if(e.key==='Enter'&&e.target.id==='chatIn'){const b=document.querySelector('[data-a=send]');if(b)sendChat(b.dataset.v)}});
 
 /* ================= WIKI ================= */
 let wikiOpen='inicio';
@@ -1729,7 +1814,7 @@ function tabWiki(){return`<div class="fr pnl"><img class="logo-big" src="${LOGO}
 /* init */
 initStatic();resize();
 if(load()&&S.heroes.length){dayRoll();questRoll();rebuildParty();B.heroes.forEach(u=>u.x=u.bx-30);spawnWave();renderPanel();offlineReward((Date.now()-S.last)/1000)}
-else{S=fresh();renderPanel();modal(classPick(true),true)}
+else{S=fresh();renderPanel();if(FIREBASE_CONFIG&&!(window.claude&&typeof window.claude.use==='function')){BOOTWAIT=true;modal(`<img class="logo-big" src="${LOGO}"><h2 style="text-align:center">Conectando ao reino...</h2>`,true);setTimeout(()=>{if(BOOTWAIT)offlineFallback()},15000)}else modal(classPick(true),true)}
 hud();requestAnimationFrame(loop);netInit();setTimeout(coach,1200);setTimeout(()=>{if(S.heroes.length&&loginState().can&&!$('#modal').classList.contains('on')&&S.tut>=TUT.length)loginModal()},1600);
 </script>
 </body>

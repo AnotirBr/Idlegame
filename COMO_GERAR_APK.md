@@ -39,7 +39,7 @@ cp /caminho/para/index.html do jogo www/index.html
 const FIREBASE_CONFIG={apiKey:"...",authDomain:"...",projectId:"...",storageBucket:"...",messagingSenderId:"...",appId:"..."};
 ```
 
-4. Em **Authentication › Método de login**, ative **Anônimo**. Cada jogador recebe uma conta automática.
+4. Em **Authentication › Método de login**, ative **E-mail/senha**. Os jogadores criam conta dentro do jogo.
 5. Em **Firestore Database**, crie o banco (modo produção) e cole estas **regras**:
 
 ```
@@ -47,16 +47,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
     function signed() { return request.auth != null; }
+    function gm() { return signed() && exists(/databases/$(db)/documents/admins/$(request.auth.uid)); }
+    function banned() { return exists(/databases/$(db)/documents/bans/$(request.auth.uid)) && get(/databases/$(db)/documents/bans/$(request.auth.uid)).data.until > request.time.toMillis(); }
+    match /admins/{uid}  { allow read: if signed(); allow write: if false; }
+    match /saves/{uid}   { allow read, write: if signed() && request.auth.uid == uid; }
     match /players/{uid} { allow read: if signed(); allow write: if signed() && request.auth.uid == uid; }
     match /chat/{id} {
       allow read: if signed();
-      allow create: if signed() && request.resource.data.u == request.auth.uid && request.resource.data.t.size() <= 140;
-      allow delete: if signed();
+      allow create: if signed() && !banned() && request.resource.data.u == request.auth.uid && request.resource.data.t.size() <= 140;
+      allow delete: if gm() || (signed() && resource.data.u == request.auth.uid) || (signed() && resource.data.ts < request.time.toMillis() - 172800000);
     }
-    match /guilds/{id} { allow read, write: if signed(); }
-    match /gboss/{id}  { allow read, write: if signed(); }
-    match /gdmg/{id}   { allow read: if signed(); allow write: if signed() && request.resource.data.u == request.auth.uid; }
-    match /gifts/{id}  {
+    match /bans/{uid}    { allow read: if signed(); allow write: if gm(); }
+    match /config/{id}   { allow read: if signed(); allow write: if gm(); }
+    match /grants/{id}   { allow read: if signed(); allow write: if gm(); }
+    match /guilds/{id}   { allow read, write: if signed(); }
+    match /gboss/{id}    { allow read, write: if signed(); }
+    match /gdmg/{id}     { allow read: if signed(); allow write: if signed() && request.resource.data.u == request.auth.uid; }
+    match /gifts/{id} {
       allow read: if signed();
       allow create: if signed() && request.resource.data.from == request.auth.uid;
       allow delete: if signed() && resource.data.to == request.auth.uid;
@@ -65,7 +72,9 @@ service cloud.firestore {
 }
 ```
 
-6. **Índices.** Na primeira vez que o chat e o chefe de guilda rodarem, o Firestore vai pedir dois índices compostos: `chat` com (`ch`, `ts` decrescente) e `gdmg` com (`g`, `wk`). O erro aparece no console do app com um link. Abra o link e o índice é criado com um clique.
+6. **Game Master.** Crie sua conta no jogo, abra Social e toque em *copiar* ao lado do seu ID. No Firestore, crie a coleção `admins`, um documento com esse ID e o campo `gm` (booleano) = `true`. Ao entrar de novo, a aba **GM** aparece.
+
+7. **Índices.** Na primeira vez que o chat e o chefe de guilda rodarem, o Firestore vai pedir dois índices compostos: `chat` com (`ch`, `ts` decrescente) e `gdmg` com (`g`, `wk`). O erro aparece no console do app com um link. Abra o link e o índice é criado com um clique.
 
 Pronto: com `FIREBASE_CONFIG` preenchido, o jogo se conecta sozinho. Sem ele, mostra "recursos online indisponíveis".
 
