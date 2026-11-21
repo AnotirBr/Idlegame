@@ -235,6 +235,19 @@ input[type=range]{padding:0;box-shadow:none;border:none;background:transparent}
 .gmb{display:inline-block;font-family:'Press Start 2P';font-size:7px;color:#fff;background:#c82a2a;padding:2px 3px 1px;box-shadow:0 0 0 1px #000;vertical-align:2px}
 textarea{width:100%;font-family:'VT323';font-size:18px;background:#0b090c;color:#fff;border:2px solid #000;box-shadow:inset 0 0 0 1px #5a3c22;padding:4px 6px;resize:vertical;user-select:text;-webkit-user-select:text}
 .gmf{display:grid;grid-template-columns:1fr 1fr;gap:6px}.gmf label{display:flex;flex-direction:column;font-size:15px;color:var(--mut);gap:2px}.gmf select,.gmf input{width:100%}
+.pt{display:grid;grid-template-columns:28px 1fr 1fr;gap:4px;align-items:stretch;margin-bottom:3px;opacity:.6}.pt.ok{opacity:1}
+.pn{font-family:'Press Start 2P';font-size:9px;color:#ffd34a;display:flex;align-items:center;justify-content:center;background:#120d09;border:2px solid #000}
+.pr{display:flex;align-items:center;gap:4px;background:#120d09;border:2px solid #000;box-shadow:inset 0 0 0 1px #4a3420;padding:2px 4px;font-size:14px;line-height:1;min-height:34px}
+.pr img{width:22px;height:22px;flex:0 0 22px}.pr span{flex:1}.pr i{color:#5cd65c;font-style:normal}.pr .btn{padding:2px 5px;font-size:15px}
+.pr.prm{box-shadow:inset 0 0 0 1px #ffd34a;background:linear-gradient(90deg,#2a1d08,#120d09)}.pr.lk{filter:grayscale(.8) brightness(.7)}
+.wheelw{position:relative;width:250px;height:250px;margin:18px auto 8px}
+.wptr{position:absolute;left:50%;top:-16px;transform:translateX(-50%);color:#fff;font-size:22px;z-index:2;text-shadow:0 2px 0 #000}
+.wheel{width:100%;height:100%;border-radius:50%;border:4px solid #ffd34a;box-shadow:0 0 0 3px #000,0 0 20px #ffc83a66;position:relative;overflow:hidden}
+.wl{position:absolute;left:50%;top:0;width:0;height:50%;transform-origin:50% 100%}
+.wl span{position:absolute;left:-30px;top:10px;width:60px;text-align:center;font-size:12px;line-height:1;color:#fff;text-shadow:1px 1px 0 #000}.wl img{width:22px;height:22px}
+
+.gmbox{border:2px solid #000;box-shadow:inset 0 0 0 1px #5a4a3a;background:#1a1410;padding:6px;margin:6px 0}.gmbox>b{display:block;margin:4px 0;font-size:17px}
+.glog{font-size:15px;padding:3px 0;border-bottom:1px solid #2a2018}.glog small{color:#8a7a68}
 </style>
 </head>
 <body>
@@ -956,15 +969,46 @@ const SND={ac:null,m:null,sfx:null,mus:null,last:{},noiseBuf:null,musT:null,step
  s_legend(){[1047,1319,1568,2093,2637].forEach((f,i)=>this.tone(f,.4,'triangle',.08,0,i*.07));this.noise(.6,6000,6,.08,.1)},
  s_buy(){this.tone(660,.08,'square',.06);this.tone(990,.12,'square',.06,0,.07)},
  s_forge(){this.noise(.15,2500,3,.45);this.tone(180,.2,'square',.1,140);this.noise(.12,2800,3,.3,.18);this.tone(200,.2,'square',.08,150,.18)},
- /* música: alaúde + bordão em ré dórico */
- music(){if(this.musT)return;const L=[62,65,69,72,74,72,69,67,65,67,69,65,64,62,0,62, 69,72,74,76,77,76,74,72,74,72,69,67,69,0,65,64];const B=[38,38,45,43, 38,41,43,45];
-  this.musT=setInterval(()=>{if(!this.ac||!S.opt.mus)return;const a=this.ac,st=.21;if(this.next<a.currentTime)this.next=a.currentTime+.05;
-   while(this.next<a.currentTime+.4){const i=this.step%L.length,n=L[i],t=this.next-a.currentTime;
-    if(n)this.pluck(440*2**((n-69)/12),t,.08);if(i%4===0){const bn=B[(this.step/4|0)%B.length];this.pluck(440*2**((bn-69)/12),t,.1,1.2)}
-    if(i%8===0)this.noise(.12,180,1,.12,t,'lowpass',this.mus);if(i%8===4)this.noise(.06,900,2,.05,t,'bandpass',this.mus);
-    this.next+=st;this.step++}},120)},
+ /* ===== música: 6 trilhas (vila, sombrio, deserto, celeste, mistério, chefe) ===== */
+ cur:'',want:'vila',
+ music(){if(this.musT)return;this.musT=setInterval(()=>{if(!this.ac||!S.opt.mus||document.hidden&&!PIP)return;const a=this.ac;this.want=musicKey();
+   if(!this.cur){this.cur=this.want;this.step=0}let tr=TRACKS[this.cur];const st=60/tr.bpm/2;if(this.next<a.currentTime)this.next=a.currentTime+.05;
+   while(this.next<a.currentTime+.35){const i=this.step%32,t=this.next-a.currentTime;
+    if(i===0&&this.want!==this.cur){this.cur=this.want;tr=TRACKS[this.cur];this.step=0;continue}
+    const bar=(i/8)|0,n=tr.mel[i],R=tr.root,f=m=>440*2**((m-69)/12);
+    if(n!=null)this.lead(f(R+n),t,st*(tr.mel[(i+1)%32]==null?2:1)*.95,tr.lead);
+    if(tr.arp&&i%2===1){const c=tr.ch[bar];this.pluck(f(R+c[(i>>1)%c.length]),t,.05,.35)}
+    if(i%8===0){this.pad(tr.ch[bar].map(x=>f(R+x-12)),t,st*8,tr.pad);this.bass(f(R+tr.bass[bar]-24),t,st*(tr.walk?2:6),tr.bassT)}
+    if(tr.walk&&i%2===0&&i%8){this.bass(f(R+tr.bass[bar]-24+(i%4?7:12)),t,st*1.6,tr.bassT)}
+    const d=tr.drum[i%tr.drum.length];if(d==='k'||d==='K')this.kick(t,d==='K'?.5:.35);if(d==='s')this.snare(t);if(d==='h')this.hat(t);
+    this.next+=st;this.step++}},100)},
+ lead(f,dl,dur,type){const a=this.ac,t=a.currentTime+dl,o=a.createOscillator(),g=a.createGain();
+  if(type==='flute'){o.type='sine';const l=a.createOscillator(),lg=a.createGain();l.frequency.value=5.2;lg.gain.value=f*.006;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+dur+.3);
+   const o2=a.createOscillator(),g2=a.createGain();o2.type='triangle';o2.frequency.value=f*2;g2.gain.value=.12;o2.connect(g2);g2.connect(g);o2.start(t);o2.stop(t+dur+.3);
+   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.09,t+.05);g.gain.setValueAtTime(.08,t+Math.max(.06,dur-.05));g.gain.linearRampToValueAtTime(0,t+dur+.2)}
+  else if(type==='square'){o.type='square';const fl=a.createBiquadFilter();fl.type='lowpass';fl.frequency.setValueAtTime(f*5,t);fl.frequency.exponentialRampToValueAtTime(f*1.5,t+dur);o.connect(fl);fl.connect(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur+.1);o.frequency.value=f;g.connect(this.mus);o.start(t);o.stop(t+dur+.15);return}
+  else{this.pluck(f,dl,.09,Math.max(.5,dur*1.5));return}
+  o.frequency.value=f;o.connect(g);g.connect(this.mus);o.start(t);o.stop(t+dur+.3)},
+ pad(fs,dl,dur,type){if(!type)return;const a=this.ac,t=a.currentTime+dl,fl=a.createBiquadFilter(),g=a.createGain();fl.type='lowpass';fl.frequency.value=type==='bright'?1800:700;fl.connect(g);g.connect(this.mus);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(type==='bright'?.035:.03,t+dur*.25);g.gain.linearRampToValueAtTime(0,t+dur*1.05);
+  fs.forEach(f=>[1,1.004].forEach(dt=>{const o=a.createOscillator();o.type='sawtooth';o.frequency.value=f*dt;o.connect(fl);o.start(t);o.stop(t+dur*1.1)}))},
+ bass(f,dl,dur,type){const a=this.ac,t=a.currentTime+dl,o=a.createOscillator(),g=a.createGain(),fl=a.createBiquadFilter();o.type=type==='saw'?'sawtooth':'triangle';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=type==='saw'?500:900;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(type==='saw'?.09:.13,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(fl);fl.connect(g);g.connect(this.mus);o.start(t);o.stop(t+dur+.05)},
+ kick(dl,v){const a=this.ac,t=a.currentTime+dl,o=a.createOscillator(),g=a.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g);g.connect(this.mus);o.start(t);o.stop(t+.2)},
+ snare(dl){this.noise(.12,1800,.8,.18,dl,'bandpass',this.mus);this.tone(190,.08,'triangle',.05,120,dl,this.mus)},
+ hat(dl){this.noise(.035,7500,.7,.05,dl,'highpass',this.mus)},
  pluck(f,dl,v,len){const a=this.ac,t=a.currentTime+dl,o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),fl=a.createBiquadFilter();o.type='triangle';o2.type='square';o.frequency.value=f;o2.frequency.value=f*1.003;fl.type='lowpass';fl.frequency.setValueAtTime(f*6,t);fl.frequency.exponentialRampToValueAtTime(f*1.2,t+.3);
   const g2=a.createGain();g2.gain.value=.25;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0005,t+(len||.6));o.connect(fl);o2.connect(g2);g2.connect(fl);fl.connect(g);g.connect(this.mus);o.start(t);o2.start(t);o.stop(t+(len||.6)+.05);o2.stop(t+(len||.6)+.05)}};
+const _=null;
+const TRACKS={
+ vila:{bpm:118,root:67,lead:'flute',pad:'bright',arp:1,mel:[0,2,4,7,9,7,4,2,4,5,7,12,11,9,7,_,9,7,5,4,2,4,5,7,4,2,0,2,4,_,0,_],ch:[[0,4,7],[5,9,12],[7,11,14],[0,4,7]],bass:[0,5,7,0],drum:'k-h-s-h-k-hks-h-'},
+ sombrio:{bpm:84,root:62,lead:'lute',pad:'dark',mel:[0,_,3,5,7,_,5,3,2,_,0,_,-2,0,2,_,3,5,7,10,8,7,5,_,7,5,3,2,0,_,_,_],ch:[[0,3,7],[-4,0,3],[-2,2,5],[-5,-1,2]],bass:[0,-4,-2,-5],drum:'k-------s-------'},
+ deserto:{bpm:100,root:64,lead:'square',pad:'dark',arp:1,mel:[0,1,4,1,0,_,-2,0,4,5,7,5,4,1,0,_,7,8,7,5,4,5,4,1,0,1,4,5,1,0,_,_],ch:[[0,4,7],[1,5,8],[0,4,7],[-2,1,5]],bass:[0,1,0,-2],drum:'k-hk--s-k-hkk-s-'},
+ celeste:{bpm:72,root:69,lead:'flute',pad:'bright',arp:1,mel:[7,_,_,4,6,_,4,_,2,_,_,4,0,_,_,_,7,_,9,_,11,_,9,7,6,_,4,_,2,_,_,_],ch:[[0,4,7,11],[5,9,12,16],[2,6,9,13],[7,11,14]],bass:[0,5,2,7],drum:'h-------h-------'},
+ misterio:{bpm:90,root:64,lead:'lute',pad:'dark',arp:1,mel:[0,2,3,7,5,3,2,_,3,5,7,9,7,5,3,_,10,9,7,5,3,5,2,_,0,_,-2,0,2,3,0,_],ch:[[0,3,7],[5,9,12],[-4,0,3],[-2,2,5]],bass:[0,5,-4,-2],drum:'k--hs-h-k-khs-h-'},
+ boss:{bpm:150,root:62,lead:'square',pad:'dark',walk:1,bassT:'saw',mel:[0,0,3,0,5,0,6,5,3,0,_,0,7,6,5,3,0,0,3,0,5,0,6,5,8,7,6,5,3,2,0,_],ch:[[0,7,12],[-4,3,8],[-2,5,10],[-5,2,7]],bass:[0,-4,-2,-5],drum:'K-hsk-hsK-kshkhs'}};
+const MUSB={village:'vila',greenwood:'vila',camp:'vila',dungeon:'sombrio',crypt:'sombrio',castle:'sombrio',swamp:'sombrio',desert:'deserto',lava:'deserto',ice:'celeste',celestial:'celeste',forest:'misterio',void:'misterio',chaos:'misterio'};
+function musicKey(){try{if(B.wasBoss&&B.enemies.some(e=>!e.dead))return'boss';return MUSB[BIO[curBio()].bg]||'vila'}catch(e){return'vila'}}
 let PIP=null;
 ['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{SND.init();SND.resume()},{passive:true}));
 
@@ -974,7 +1018,7 @@ function fmt(n){n=+n||0;const neg=n<0;n=Math.abs(n);let s;if(n<1000)s=n<10&&n%1?
 const pct=v=>(Math.round(v*1000)/10)+'%';
 const G=1.035;let UID=Date.now()%1e6;const uid=()=>++UID;
 const KEY='masmorra_idle_v2',KEY1='masmorra_idle_v1';const KEYMAX=5,KEYREG=18e5;
-function fresh(){return{v:2,gold:0,gems:30,runes:0,frag:0,stage:1,wave:1,maxStage:1,farm:false,heroes:[],inv:[],up:{str:0,vit:0,arm:0,gold:0,xp:0,luck:0},st:{kills:0,bosses:0,levels:0,enh:0,loot:0,skills:0,goldT:0,prest:0},q:[],opt:{auto:-1,spd:1,sfx:1,mus:1,vol:.6},sel:0,last:Date.now(),boostG:0,boostX:0,keys:3,keyT:Date.now(),dun:null,dlv:{},nick:'',guild:'',friends:[],gcon:0,guildLv:0,tut:0,gift:{},ess:0,rn:{},best:{},troph:{},regDone:{},cos:[],pets:{},pet:'',eggs:0,bag:40,bagN:0,prot:0,useProt:0,day:{d:'',drops:0},login:{n:0,c:''},dq:null,wq:null,ev:null,ach:{},title:'',tw:{max:0},gbAtt:{d:'',n:0},gbClaim:'',merch:null,ch:null,owner:'',offline:0,gclaim:{},annSeen:0}}
+function fresh(){return{v:2,gold:0,gems:30,runes:0,frag:0,stage:1,wave:1,maxStage:1,farm:false,heroes:[],inv:[],up:{str:0,vit:0,arm:0,gold:0,xp:0,luck:0},st:{kills:0,bosses:0,levels:0,enh:0,loot:0,skills:0,goldT:0,prest:0},q:[],opt:{auto:-1,spd:1,sfx:1,mus:1,vol:.6},sel:0,last:Date.now(),boostG:0,boostX:0,keys:3,keyT:Date.now(),dun:null,dlv:{},nick:'',guild:'',friends:[],gcon:0,guildLv:0,tut:0,gift:{},ess:0,rn:{},best:{},troph:{},regDone:{},cos:[],pets:{},pet:'',eggs:0,bag:40,bagN:0,prot:0,useProt:0,day:{d:'',drops:0},login:{n:0,c:''},dq:null,wq:null,ev:null,ach:{},title:'',tw:{max:0},gbAtt:{d:'',n:0},gbClaim:'',merch:null,ch:null,owner:'',offline:0,gclaim:{},annSeen:0,pass:null,wheel:null}}
 let S=fresh();
 function save(){S.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function fixItem(it){if(!it)return it;if(!it.t||!ITY[it.s][it.t]){it.t=pick(Object.keys(ITY[it.s]));it.n=ITY[it.s][it.t].n+' '+pick(ISUF)}return it}
@@ -1309,9 +1353,9 @@ function tabForja(){const eqd=[];S.heroes.forEach(h=>SLOTS.forEach(sl=>{if(h.eq[
  return o+`<div style="margin-top:6px">Fragmentos: <b class="bl">${S.frag}</b></div></div>`}
 const QT={kills:['Derrote {n} inimigos','skull','#e8e0d0',()=>ri(150,400)],bosses:['Derrote {n} chefes','crown','#ffd34a',()=>ri(2,5)],levels:['Suba {n} níveis de heróis','up','#5cd65c',()=>ri(3,8)],enh:['Aprimore itens {n} vezes','anvil','#8a94a4',()=>ri(2,5)],loot:['Encontre {n} itens','chest','#9a6232',()=>ri(4,10)],skills:['Aprenda {n} níveis de habilidade','book','#4a7aff',()=>ri(2,5)],goldT:['Ganhe {n} de ouro','coin','#e8b030',()=>Math.floor(goldKill(Math.max(10,Lv()))*ri(150,300))],dun:['Vença {n} masmorras','key','#e8b030',()=>ri(1,2)]};
 const qProg=q=>0;
-function missDot(){questRoll();const ql=S.dq.list.concat(S.wq.list).some(q=>!q.ok&&qP(q)>=q.n);return loginState().can||ql||ACH.some(a=>!S.ach[a[0]]&&a[3]())}
-function tabMiss(){questRoll();let o=`<div class="fr pnl"><h3>MISSÕES</h3>${missLogin()}${subtabs(missTab,'misstab',[['dia','Diárias','scroll','#e8d8b0'],['ev','Evento','star','#ffd34a'],['ach','Conquistas','crown','#ffd34a']])}`;
- if(missTab==='dia')o+=missDaily();if(missTab==='ev')o+=missEvent();if(missTab==='ach')o+=missAch();o+='</div>';
+function missDot(){questRoll();passRoll();wheelRoll();const ql=S.dq.list.concat(S.wq.list).some(q=>!q.ok&&qP(q)>=q.n);const t=passTier();let pp=false;for(let i=1;i<=t;i++)if(!S.pass.got[i]||(S.pass.prem&&!S.pass.gotP[i])){pp=true;break}return loginState().can||ql||pp||S.wheel.n===0||ACH.some(a=>!S.ach[a[0]]&&a[3]())}
+function tabMiss(){questRoll();let o=`<div class="fr pnl"><h3>MISSÕES</h3>${missLogin()}${subtabs(missTab,'misstab',[['dia','Diárias','scroll','#e8d8b0'],['pass','Passe','crown','#ff4ad8'],['roda','Roleta','sun','#ffd34a'],['ev','Evento','star','#ffd34a'],['ach','Feitos','crown','#ffd34a']])}`;
+ if(missTab==='dia')o+=missDaily();if(missTab==='pass')o+=missPass();if(missTab==='roda')o+=missWheel();if(missTab==='ev')o+=missEvent();if(missTab==='ach')o+=missAch();o+='</div>';
  const s=S.st;o+=`<div class="fr pnl"><h3>CRÔNICAS</h3><div class="stats">${[['skull','#e8e0d0','Abates',fmt(s.kills)],['crown','#ffd34a','Chefes',fmt(s.bosses)],['map','#e8d8b0','Fase máx',S.maxStage],['rune','#a35cff','Renasc.',s.prest],['chest','#9a6232','Itens',fmt(s.loot)],['up','#4ab0ff','Torre',S.tw.max]].map(([g,c,n,v])=>`<div><img src="${icon(g,c)}"><span>${n}</span><b>${v}</b></div>`).join('')}</div></div>`;return o}
 /* preview */
 const PED=(()=>{const b=new PB(44,10),Q=ramp('#5a5868');b.ell(22,4,21,4.5,Q);b.r(2,5,40,4,Q[0]);for(let x=2;x<42;x++)if(!b.g(x,4))b.e(x,5);b.ell(22,4,16,3,ramp('#7a7888'));b.r(10,7,24,1,'#2a2834');return b.outline(OUT).toC()})();
@@ -1467,7 +1511,7 @@ const ACH=[['k1','Primeiro Sangue','Derrote 100 inimigos',()=>S.st.kills>=100,5,
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function weekKey(d=new Date()){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fy=new Date(Date.UTC(t.getUTCFullYear(),0,4));return t.getUTCFullYear()+'w'+(1+Math.round(((t-fy)/864e5-3+((fy.getUTCDay()+6)%7))/7))}
 let EVO=null;
-function curEvent(){if(EVO&&EVO.until>Date.now()){const e=EVS.find(x=>x.id===EVO.id);if(e)return e}const d=new Date().getDay();if(!(d===5||d===6||d===0))return null;return EVS[parseInt(weekKey().split('w')[1])%EVS.length]}
+function curEvent(){if(EVO&&EVO.until>Date.now()&&(!EVO.start||EVO.start<=Date.now())){if(EVO.id==='custom')return{id:'custom'+(EVO.start||0),n:EVO.n||'Evento Especial',d:EVO.d||'Evento do Game Master',xp:EVO.xp||1,gold:EVO.gold||1,luck:EVO.luck||0,boss:EVO.boss||0,cos:EVO.cos||1};const e=EVS.find(x=>x.id===EVO.id);if(e)return e}const d=new Date().getDay();if(!(d===5||d===6||d===0))return null;return EVS[parseInt(weekKey().split('w')[1])%EVS.length]}
 let MB=null;
 function metaBonus(){if(MB)return MB;const b={atk:0,hp:0,def:0,gold:0,xp:0,luck:0,cdmg:0,aspd:0,crit:0,drop:0,forge:0,off:0,heal:0};
  if(typeof S==='undefined'||!S.rn)return b;
@@ -1480,7 +1524,7 @@ const mbDirty=()=>{MB=null};
 function dayRoll(){const k=dayKey();if(!S.day||S.day.d!==k)S.day={d:k,drops:0}}
 const dropCap=()=>50+metaBonus().drop;
 function dropsLeft(){dayRoll();return dropCap()-S.day.drops}
-function onKill(e){const d=e.d,id=d.id;if(!id)return;S.best[id]=(S.best[id]||0)+1;const k=S.best[id];if(k===50||k===500){mbDirty();rebuildParty()}
+function onKill(e){const d=e.d,id=d.id;if(!id)return;passAdd(e.boss?10:e.rk?1:.1);S.best[id]=(S.best[id]||0)+1;const k=S.best[id];if(k===50||k===500){mbDirty();rebuildParty()}
  if(S.ev&&S.ev.id){if(e.boss)S.ev.p.bosses=(S.ev.p.bosses||0)+1;S.ev.p.kills=(S.ev.p.kills||0)+1}
  if(S.ch||id==='colosso')return;const ev=curEvent()||{};
  let ch=e.boss?1/15:e.rk===2?1/30:e.rk===1?1/80:1/300;ch*=(1+metaBonus().luck)*(e.boss&&ev.boss?2:1);
@@ -1488,7 +1532,7 @@ function onKill(e){const d=e.d,id=d.id;if(!id)return;S.best[id]=(S.best[id]||0)+
  if(e.boss&&Math.random()<(1/150)*(ev.cos||1))giveCos(null);
  if(e.boss&&Math.random()<1/40){S.eggs++;toast(`<img src="${icon('egg','#f0e8d0')}" class="ti"> Você achou um Ovo de Pet!`)}}
 function checkRegionSets(){BIO.forEach((b,i)=>{if(S.regDone[i])return;if(b.en.concat(b.boss).every(m=>S.troph[m])){S.regDone[i]=1;S.gems+=20;giveCos(b.cos);toast(`Bestiário de <b>${b.n}</b> completo! +20 gemas`)}})}
-function giveCos(id,silent){const pool=Object.keys(COS).filter(k=>!S.cos.includes(k)&&k!=='auraArco');if(!id){if(!pool.length){S.gems+=10;return}id=pick(pool)}if(S.cos.includes(id)){S.gems+=10;return}S.cos.push(id);if(!silent){toast(`Novo visual: <b class="g">${COS[id].n}</b> (${COS[id].d})!`);SND.play('legend')}}
+function giveCos(id,silent){const pool=Object.keys(COS).filter(k=>!S.cos.includes(k)&&k!=='auraArco'&&!COS[k].season);if(!id){if(!pool.length){S.gems+=10;return}id=pick(pool)}if(S.cos.includes(id)){S.gems+=10;return}S.cos.push(id);if(!silent){toast(`Novo visual: <b class="g">${COS[id].n}</b> (${COS[id].d})!`);SND.play('legend')}}
 /* ---- pets ---- */
 function hatchEgg(){if(S.eggs<1)return;S.eggs--;const id=pick(Object.keys(PETS));let txt;if(!S.pets[id]){S.pets[id]={s:1,l:1,sh:0};if(!S.pet)S.pet=id;txt=`Novo pet: <b class="g">${PETS[id].n}</b>!`}else{S.pets[id].sh++;txt=`${PETS[id].n} repetido: +1 fragmento de evolução`}
  mbDirty();rebuildParty();reveal('Ovo de Pet',icon('egg','#f0e8d0'),[{r:Math.min(5,S.pets[id].s+1),html:`<img src="${urlOf(petFrames(id)[0])}" style="width:64px;height:64px"><div>${txt}</div>`}]);save()}
@@ -1503,7 +1547,7 @@ function reviveHalf(){B.heroes.forEach(u=>{if(u.dead){u.dead=false;u.hp=u.st.hp*
 function chClear(){const c=S.ch;
  if(c.k==='dun'){if(c.w>=DW){dunWin();return}c.w++;reviveHalf();spawnWave();return}
  if(c.k==='tw'){const L=curL();if(c.f>S.tw.max){S.tw.max=c.f;const g=goldKill(L)*20;S.gold+=g;c.gold+=g;if(c.f%10===0){S.gems+=5;c.gems+=5;const it=mkItem(pick(SLOTS),rollRar(2,3),L);addItem(it,true);c.items.push(it);if(Math.random()<.3){S.eggs++;c.eggs++}if(c.f===100)giveCos('auraArco')}}
-  c.f++;c.t=c.T;reviveHalf();spawnWave();return}
+  passAdd(8);c.f++;c.t=c.T;reviveHalf();spawnWave();return}
  chEnd('time')}
 function chEnd(why){const c=S.ch;if(!c)return;S.ch=null;B.heroes.forEach(u=>{u.dead=false;u.hp=u.st.hp;u.act=null;u.buffs=[];u.shield=0});spawnWave();
  if(c.k==='dun'){SND.play('defeat');modal(`<h2>A masmorra venceu...</h2><div style="font-size:18px">Seus heróis recuaram de <b>${DUNS.find(d=>d.id===c.id).n}</b> (dificuldade ${c.lvl}). Fortaleça a equipe e tente de novo.</div><div class="btns"><button class="btn gry" data-a="close">Voltar</button></div>`)}
@@ -1513,7 +1557,7 @@ function chEnd(why){const c=S.ch;if(!c)return;S.ch=null;B.heroes.forEach(u=>{u.d
 function dunStart(id){const d=DUNS.find(x=>x.id===id);if(S.ch)return;if(keysNow()<1)return toast('Sem chaves! Espere a recarga ou compre na Loja.');if(S.maxStage<d.req)return;
  S.keys--;if(S.keys===KEYMAX-1)S.keyT=now();chStart({k:'dun',id,lvl:S.dlv[id]||1,w:1,t:90,T:90});spawnBanner(d.n.toUpperCase(),'#ff9af0');SND.play('boss');save()}
 function dunWin(){const c=S.ch,d=DUNS.find(x=>x.id===c.id),lvl=c.lvl,L=curL()+6;S.ch=null;B.heroes.forEach(u=>{u.dead=false;u.hp=u.st.hp;u.act=null;u.buffs=[];u.shield=0});spawnWave();
- S.dlv[d.id]=Math.max(S.dlv[d.id]||1,lvl+1);S.st.dun=(S.st.dun||0)+1;if(S.ev&&S.ev.id)S.ev.p.dun=(S.ev.p.dun||0)+1;const res=[];
+ S.dlv[d.id]=Math.max(S.dlv[d.id]||1,lvl+1);S.st.dun=(S.st.dun||0)+1;passAdd(60);if(S.ev&&S.ev.id)S.ev.p.dun=(S.ev.p.dun||0)+1;const res=[];
  if(d.id==='cofre'){const g=goldKill(L)*120;S.gold+=g;S.st.goldT+=g;res.push({r:3,html:`<img src="${icon('coin','#e8b030')}" style="width:48px;height:48px"><div>+${fmt(g)} ouro</div>`})}
  if(d.id==='torre'){const x=xpKill(L)*90;S.heroes.forEach(h=>gainXp(h,x));res.push({r:3,html:`<img src="${icon('book','#4a7aff')}" style="width:48px;height:48px"><div>+${fmt(x)} XP por herói</div>`})}
  if(d.id==='arsenal'){[0,1,2].forEach(()=>{const i=mkItem(pick(SLOTS),rollRar(2+lvl*.3,2),L);addItem(i,true);res.push(revItem(i))})}
@@ -1593,14 +1637,55 @@ Object.assign(ACT,{
  bagup:()=>{const c=bagCost();if(S.bag>=200)return toast('Bolsa no tamanho máximo.');if(S.gems<c)return toast(`Precisa de ${c} gemas.`);S.gems-=c;S.bag+=10;S.bagN++;SND.play('buy');toast(`Bolsa ampliada para ${S.bag}!`);renderPanel();save()},
  rune:v=>{const c=runeCost(v),r=RUNES[v];if((S.rn[v]||0)>=r.mx||S.ess<c)return;S.ess-=c;S.rn[v]=(S.rn[v]||0)+1;mbDirty();rebuildParty();SND.play('legend');renderPanel();save()},
  iap:v=>{if(window.BILLING&&typeof window.BILLING.buy==='function'){window.BILLING.buy(+v);return}modal(`<h2>Compra de gemas</h2><div style="font-size:18px">A compra com dinheiro real fica disponível no app publicado na Play Store (cobrança pelo Google Play). Nesta versão nenhuma cobrança é feita.</div><div class="btns"><button class="btn gry" data-a="close">Entendi</button></div>`)},
- login:()=>loginModal(),loginclaim:()=>{const st=loginState();if(!st.can)return;const txt=LOGINR[st.day-1][3]();S.login={n:st.day,c:dayKey()};closeM();reveal('Recompensa do dia '+st.day,icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2]),[{r:st.day===7?4:2,html:`<img src="${icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2])}" style="width:48px;height:48px"><div>${txt}</div>`}]);save()},
- qclaim:v=>{const kind=v[0],i=+v.slice(1),q=(kind==='d'?S.dq:S.wq).list[i];if(!q||q.ok||qP(q)<q.n)return;q.ok=1;if(kind==='d'){S.gold+=q.gold;if(q.key)S.keys++;toast(`+${fmt(q.gold)} ouro${q.key?' e 1 chave':''}`)}else{S.gems+=q.gems;S.eggs+=q.egg;toast(`+${q.gems} gemas e 1 ovo`)}SND.play('coin');renderPanel();save()},
- evclaim:v=>{if(!S.ev||!S.ev.id||S.ev.got[v])return;if(v==='all'){if(!EVT.every(([k])=>S.ev.got[k]))return;S.ev.got.all=1;S.gems+=20;giveCos(null)}else{const t=EVT.find(x=>x[0]===v);if((S.ev.p[v]||0)<t[2])return;S.ev.got[v]=1;S.gems+=15;toast('+15 gemas')}SND.play('victory');renderPanel();save()},
+ login:()=>loginModal(),loginclaim:()=>{const st=loginState();if(!st.can)return;const txt=LOGINR[st.day-1][3]();S.login={n:st.day,c:dayKey()};passAdd(50);closeM();reveal('Recompensa do dia '+st.day,icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2]),[{r:st.day===7?4:2,html:`<img src="${icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2])}" style="width:48px;height:48px"><div>${txt}</div>`}]);save()},
+ qclaim:v=>{const kind=v[0],i=+v.slice(1),q=(kind==='d'?S.dq:S.wq).list[i];if(!q||q.ok||qP(q)<q.n)return;q.ok=1;passAdd(kind==='d'?40:150);if(kind==='d'){S.gold+=q.gold;if(q.key)S.keys++;toast(`+${fmt(q.gold)} ouro${q.key?' e 1 chave':''}`)}else{S.gems+=q.gems;S.eggs+=q.egg;toast(`+${q.gems} gemas e 1 ovo`)}SND.play('coin');renderPanel();save()},
+ evclaim:v=>{if(!S.ev||!S.ev.id||S.ev.got[v])return;if(v==='all'){if(!EVT.every(([k])=>S.ev.got[k]))return;S.ev.got.all=1;S.gems+=20;giveCos(null)}else{const t=EVT.find(x=>x[0]===v);if((S.ev.p[v]||0)<t[2])return;S.ev.got[v]=1;S.gems+=15;passAdd(30);toast('+15 gemas')}SND.play('victory');renderPanel();save()},
  achclaim:v=>{const a=ACH.find(x=>x[0]===v);if(!a||S.ach[v]||!a[3]())return;S.ach[v]=1;S.gems+=a[4];S.title=a[5];toast(`Conquista! +${a[4]} gemas · título “${a[5]}”`);SND.play('legend');syncProfile(true);renderPanel();save()},
  title:v=>{S.title=v;syncProfile(true);renderPanel();save()},
  gbattack:()=>gbStart(),gbclaim:()=>gbClaim(),
  prestige:()=>{const g=essGain();if(g<1)return toast('Renascer libera a partir do andar 200.');modal(`<h2>Renascer?</h2><div>Você ganhará <b class="g">+${g} Essência Rúnica</b> para evoluir runas específicas no Grimório.<br><span class="mut">Fase, ouro, melhorias, níveis, habilidades e subclasses voltam ao início.</span></div><div class="btns"><button class="btn pur" data-a="prestigeOk">Renascer!</button><button class="btn gry" data-a="close">Cancelar</button></div>`)},
  prestigeOk:()=>{const g=essGain();if(g<1)return;S.ess+=g;S.st.prest++;S.stage=1;S.wave=1;S.maxStage=1;S.farm=false;S.gold=0;S.ch=null;for(const k in S.up)S.up[k]=0;S.heroes.forEach(h=>{h.lvl=1;h.xp=0;h.sp=1;h.sk={};h.sub=null});B.heroes=[];mbDirty();rebuildParty();spawnWave();closeM();renderPanel();save();toast(`Renascido! Essência: ${S.ess}`);SND.play('legend')}});
+/* ================= PASSE DA TEMPORADA + ROLETA ================= */
+Object.assign(COS,{capaInverno:{n:'Capa do Inverno Eterno',t:'capa',c:'#9ad8ff',k:'hp',v:.08,d:'+8% VIDA',season:1},auraEstelar:{n:'Aura Estelar',t:'aura',c:'#ffe48a',k:'crit',v:.03,d:'+3% crítico',season:1},
+ capaDragao:{n:'Capa do Dragão Rubro',t:'capa',c:'#c81a1a',k:'atk',v:.07,d:'+7% ATQ',season:1},auraRunica:{n:'Aura Rúnica',t:'aura',c:'#c27aff',k:'cdmg',v:.12,d:'+12% dano crítico',season:1}});
+const SEASONCOS=['capaInverno','auraEstelar','capaDragao','auraRunica'];
+const SEASON0=Date.UTC(2026,0,5),SLEN=28*864e5,PTIER=600,PTIERS=30,PPRICE=400;
+const seasonId=()=>Math.floor((Date.now()-SEASON0)/SLEN);
+const seasonCos=()=>SEASONCOS[seasonId()%SEASONCOS.length];
+function passRoll(){const s=seasonId();if(!S.pass||S.pass.s!==s)S.pass={s,xp:0,got:{},gotP:{},prem:false}}
+let passAcc=0;
+function passAdd(n){if(!S.pass)passRoll();passAcc+=n;if(passAcc>=1){const k=Math.floor(passAcc);passAcc-=k;passRoll();const before=Math.floor(S.pass.xp/PTIER);S.pass.xp+=k;if(Math.floor(S.pass.xp/PTIER)>before&&before<PTIERS)toast(`Passe: nível <b class="g">${Math.min(PTIERS,before+1)}</b> liberado!`)}}
+const passTier=()=>Math.min(PTIERS,Math.floor(S.pass.xp/PTIER));
+function passReward(i,prem){if(!prem){if(i===30)return{cos:seasonCos()};if(i===20)return{chest:4};if(i===10)return{cosR:1};if(i%5===0)return{egg:1};if(i%3===0)return{gems:5};if(i%2===0)return{keys:1};return{goldMin:30,frag:30}}
+ if(i===30)return{chest:5,gems:50};if(i===15)return{chest:4};if(i%5===0)return{gems:20,egg:1};if(i%2)return{gems:5,frag:40};return{keys:2,goldMin:60}}
+function rewDesc(r){const p=[];if(r.cos)p.push(COS[r.cos].n);if(r.cosR)p.push('Visual aleatório');if(r.chest)p.push('Baú '+RAR[r.chest].n);if(r.gems)p.push(r.gems+' gemas');if(r.egg)p.push(r.egg+' ovo');if(r.keys)p.push(r.keys+(r.keys>1?' chaves':' chave'));if(r.goldMin)p.push('Ouro');if(r.frag)p.push(r.frag+' frag.');return p.join(' + ')}
+function rewIcon(r){return r.cos?cosIcon(r.cos):r.cosR?icon('wing','#ff4ad8'):r.chest?icon('chest',RCOL[r.chest]):r.gems?icon('gem','#3a8aff'):r.egg?icon('egg','#f0e8d0'):r.keys?icon('key','#e8b030'):icon('coin','#e8b030')}
+function applyRew(r){const out=[];const L=Math.max(10,Lv());if(r.gems){S.gems+=r.gems;out.push(`+${r.gems} gemas`)}if(r.keys){S.keys+=r.keys;out.push(`+${r.keys} chave(s)`)}if(r.egg){S.eggs+=r.egg;out.push(`+${r.egg} ovo`)}if(r.frag){S.frag+=r.frag;out.push(`+${r.frag} fragmentos`)}
+ if(r.goldMin){const g=goldKill(L)*.3*60*r.goldMin;S.gold+=g;out.push(`+${fmt(g)} ouro`)}if(r.chest){const it=mkItem(pick(SLOTS),rollRar(3,r.chest),L);addItem(it,true);out.push(`<span class="c${it.r}">${it.n}</span>`)}
+ if(r.cos){const had=S.cos.includes(r.cos);giveCos(r.cos,true);out.push(had?'+10 gemas (visual repetido)':COS[r.cos].n)}if(r.cosR){const b=S.cos.length;giveCos(null,true);out.push(S.cos.length>b?COS[S.cos[S.cos.length-1]].n:'+10 gemas')}return out.join('<br>')}
+function missPass(){passRoll();const t=passTier(),xp=S.pass.xp%PTIER,left=SLEN-((Date.now()-SEASON0)%SLEN),days=Math.ceil(left/864e5);
+ let o=`<div class="evb"><b>TEMPORADA ${seasonId()+1}</b><br>Nível <b class="g">${t}/${PTIERS}</b> · termina em ${days} dia(s) · prêmio final: <span class="c6">${COS[seasonCos()].n}</span></div>
+ <div class="prog"><i style="width:${t>=PTIERS?100:xp/PTIER*100}%"></i></div><div class="mut" style="font-size:15px;margin:2px 0 6px">${t>=PTIERS?'Passe completo!':`${Math.floor(xp)}/${PTIER} XP do passe`} · ganhe XP derrotando inimigos e chefes, vencendo masmorras, subindo a torre e completando missões.</div>
+ ${S.pass.prem?'<div class="g" style="font-size:17px">★ Passe Real ativo</div>':`<div class="li"><div class="tx"><b>Passe Real</b><br><span class="mut">Libera a trilha dourada: mais gemas, ovos, chaves e baús Lendário e Mítico.</span></div><button class="btn sm blu ${S.gems<PPRICE?'dis':''}" data-a="passbuy">${gemI()}${PPRICE}</button></div>`}`;
+ for(let i=1;i<=PTIERS;i++){const fr=passReward(i,false),pr=passReward(i,true),ok=t>=i,gf=S.pass.got[i],gp=S.pass.gotP[i];
+  o+=`<div class="pt ${ok?'ok':''}"><div class="pn">${i}</div><div class="pr"><img src="${rewIcon(fr)}"><span>${rewDesc(fr)}</span>${gf?'<i>✔</i>':ok?`<button class="btn sm gld" data-a="passget" data-v="f${i}">Pegar</button>`:''}</div>
+  <div class="pr prm ${S.pass.prem?'':'lk'}"><img src="${rewIcon(pr)}"><span>${rewDesc(pr)}</span>${gp?'<i>✔</i>':ok&&S.pass.prem?`<button class="btn sm gld" data-a="passget" data-v="p${i}">Pegar</button>`:''}</div></div>`}
+ return o}
+const WHEEL=[{n:'Ouro',w:30,c:'#c88a18',r:{goldMin:60}},{n:'Fragmentos',w:18,c:'#2a8ab8',r:{frag:40}},{n:'Chave',w:14,c:'#8a5a2a',r:{keys:1}},{n:'5 Gemas',w:12,c:'#2a5ab8',r:{gems:5}},{n:'Ovo',w:8,c:'#6a8a4a',r:{egg:1}},{n:'Baú Épico',w:8,c:'#7a2aa8',r:{chest:3}},{n:'30 Gemas',w:3,c:'#1a3a9a',r:{gems:30}},{n:'Visual',w:1.5,c:'#c82a6a',r:{cosR:1}}];
+function wheelRoll(){const d=dayKey();if(!S.wheel||S.wheel.d!==d)S.wheel={d,n:0}}
+const wheelCost=()=>S.wheel.n===0?0:20;
+function missWheel(){wheelRoll();const seg=360/WHEEL.length;const grad=WHEEL.map((w,i)=>`${w.c} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+ return`<div class="wheelw"><div class="wptr">▼</div><div id="wheel" class="wheel" style="background:conic-gradient(${grad})">${WHEEL.map((w,i)=>`<div class="wl" style="transform:rotate(${i*seg+seg/2}deg)"><span><img src="${rewIcon(w.r)}"><br>${w.n}</span></div>`).join('')}</div></div>
+ <div class="mut" style="text-align:center;font-size:16px">1 giro grátis por dia. Giros extras custam 20 gemas (até 5 por dia).</div>
+ <div class="btns"><button class="btn gld ${S.wheel.n>5||(wheelCost()&&S.gems<20)||WSPIN?'dis':''}" data-a="spin">${S.wheel.n===0?'Girar grátis!':`Girar de novo (20${gemI()})`}</button></div>`}
+let WSPIN=false,WANG=0;
+Object.assign(ACT,{
+ passbuy:()=>{passRoll();if(S.pass.prem||S.gems<PPRICE)return;S.gems-=PPRICE;S.pass.prem=true;SND.play('legend');toast('Passe Real ativado!');renderPanel();save()},
+ passget:v=>{passRoll();const prem=v[0]==='p',i=+v.slice(1);if(passTier()<i)return;const g=prem?S.pass.gotP:S.pass.got;if(g[i]||(prem&&!S.pass.prem))return;g[i]=1;const r=passReward(i,prem);const txt=applyRew(r);reveal(`Passe: nível ${i}`,rewIcon(r),[{r:r.cos||r.cosR?6:r.chest||3,html:`<img src="${rewIcon(r)}" style="width:48px;height:48px"><div>${txt}</div>`}]);renderPanel();save()},
+ spin:()=>{wheelRoll();if(WSPIN||S.wheel.n>5)return;const c=wheelCost();if(c&&S.gems<c)return toast('Gemas insuficientes.');S.gems-=c;S.wheel.n++;WSPIN=true;
+  const tot=WHEEL.reduce((a,w)=>a+w.w,0);let r=Math.random()*tot,idx=0;for(;idx<WHEEL.length-1;idx++){r-=WHEEL[idx].w;if(r<0)break}
+  const seg=360/WHEEL.length;WANG+=360*6+(360-((WANG%360)))+(360-(idx*seg+seg/2))+R(-seg*.35,seg*.35);const el=$('#wheel');if(el){el.style.transition='transform 3.4s cubic-bezier(.15,.85,.25,1)';el.style.transform=`rotate(${WANG}deg)`}SND.play('cast');
+  setTimeout(()=>{WSPIN=false;const w=WHEEL[idx],txt=applyRew(w.r);passAdd(5);reveal('Roleta: '+w.n,rewIcon(w.r),[{r:w.r.cosR?6:w.r.chest||(w.w<5?5:2),html:`<img src="${rewIcon(w.r)}" style="width:48px;height:48px"><div>${txt}</div>`}]);save()},3500)}});
 
 /* ================= SOCIAL (chat, ranking, guildas, amigos) ================= */
 const NET={ok:false,loading:true,db:null,user:null,uid:null,owner:false,chat:[],gchat:[],players:[],pT:0,guilds:[],inReq:[],gifts:[],gsub:null,lastSync:'',lastSyncT:0,unread:0};
@@ -1633,7 +1718,7 @@ async function netStart(uid){NET.uid=uid;NET.ok=true;NET.loading=false;const db=
  NET.subs.push(db.collection('grants').where('to','in',[uid,'all']).onSnapshot(s=>{NET.grants=s.docs.map(d=>Object.assign({id:d.id},d.data()));checkGrants()},()=>{}));
  NET.subs.push(db.doc('config/announce').onSnapshot(d=>{NET.ann=d.exists?d.data():null;showAnn()},()=>{}));
  NET.subs.push(db.doc('config/event').onSnapshot(d=>{EVO=d.exists?d.data():null;hudDirty=true;if(tab==='miss')renderPanel()},()=>{}));
- NET.subs.push(db.doc('bans/'+uid).onSnapshot(d=>{NET.ban=d.exists?d.data():null;socialDirty()},()=>{}));
+ NET.subs.push(db.doc('bans/'+uid).onSnapshot(d=>{NET.ban=d.exists?d.data():null;onBan();socialDirty()},()=>{}));
  try{const a=await db.collection('admins').get();NET.gms=new Set(a.docs.map(d=>d.id))}catch(e){NET.gms=new Set()}if(NET.gm)NET.gms.add(uid);
  if(S.guild)subGuild();await refreshPlayers(true);syncProfile(true);socialDirty()}
 /* ---- save na nuvem ---- */
@@ -1660,30 +1745,95 @@ function showLogin(mode){LOGIN_OPEN=true;const up=mode==='up';
 const lgErr=t=>{const e=$('#lgErr');if(e)e.textContent=t};
 /* ---- Game Master ---- */
 let grantT=null;
-function checkGrants(){const g=(NET.grants||[]).filter(x=>!S.gclaim[x.id]).sort((a,b)=>a.ts-b.ts)[0];if(!g)return;if(!S.heroes.length||LOGIN_OPEN||$('#modal').classList.contains('on')){clearTimeout(grantT);grantT=setTimeout(checkGrants,3000);return}
- S.gclaim[g.id]=1;const res=[];if(g.gems){S.gems+=g.gems;res.push(`${g.gems} gemas`)}if(g.keys){S.keys+=g.keys;res.push(`${g.keys} chaves`)}if(g.eggs){S.eggs+=g.eggs;res.push(`${g.eggs} ovos`)}if(g.gmin){const v=goldKill(Math.max(10,Lv()))*0.3*60*g.gmin;S.gold+=v;res.push(`${fmt(v)} ouro`)}
- if(g.item){const it=mkItem(pick(SLOTS),clamp(g.item|0,0,6),Math.max(10,Lv()));addItem(it,true);res.push(`<span class="c${it.r}">${it.n}</span>`)}
- reveal('Presente do Game Master',icon('crown','#e2443c'),[{r:4,html:`<div style="font-size:18px">${g.msg?`“${esc(g.msg)}”<br><br>`:''}${res.join('<br>')||'Uma mensagem para você!'}</div>`}]);save();cloudSave(true);setTimeout(checkGrants,4000)}
-function showAnn(){const el=$('#ann');if(!el)return;const a=NET.ann;if(!a||!a.t||Date.now()-a.ts>3*864e5||S.annSeen===a.ts){el.style.display='none';return}el.style.display='';el.innerHTML=`<img src="${icon('crown','#e2443c')}" class="ti"> <span>${esc(a.t)}</span><i data-a="annx">✕</i>`}
+const grantDue=x=>!S.gclaim[x.id]&&(!x.at||x.at<=Date.now());
+function schedGrants(){clearTimeout(grantT);const fut=(NET.grants||[]).filter(x=>!S.gclaim[x.id]&&x.at>Date.now());if(fut.length)grantT=setTimeout(checkGrants,Math.min(6e4,Math.max(1000,Math.min(...fut.map(x=>x.at))-Date.now())))}
+function checkGrants(){const g=(NET.grants||[]).filter(grantDue).sort((a,b)=>a.ts-b.ts)[0];if(!g){schedGrants();return}
+ if(LOGIN_OPEN||$('#modal').classList.contains('on')||(!S.heroes.length&&g.op!=='reset')){clearTimeout(grantT);grantT=setTimeout(checkGrants,3000);return}
+ if(g.op){applyOp(g);return}
+ S.gclaim[g.id]=1;const res=[],L=Math.max(10,Lv());if(g.gems){S.gems+=g.gems;res.push(`${g.gems} gemas`)}if(g.keys){S.keys+=g.keys;res.push(`${g.keys} chaves`)}if(g.eggs){S.eggs+=g.eggs;res.push(`${g.eggs} ovos`)}
+ if(g.gmin){const v=goldKill(L)*.3*60*g.gmin;S.gold+=v;res.push(`${fmt(v)} ouro`)}
+ if(g.item!=null&&!g.it){const it=mkItem(pick(SLOTS),clamp(g.item|0,0,6),L);addItem(it,true);res.push(`<span class="c${it.r}">${it.n}</span>`)}
+ if(g.it&&ITY[g.it.s]){const T=g.it,it=mkItem(T.s,clamp(T.r|0,0,6),L,ITY[T.s][T.t]?T.t:undefined);it.en=clamp(T.en|0,0,15);if(it.en)S.st.maxEn=Math.max(S.st.maxEn||0,it.en);addItem(it,true);res.push(`<img src="${itemIcon(it)}" class="ti"> <span class="c${it.r}">${it.n}${it.en?' +'+it.en:''}</span>`)}
+ if(g.pet&&PETS[g.pet]){if(!S.pets[g.pet]){S.pets[g.pet]={s:1,l:1,sh:0};if(!S.pet)S.pet=g.pet}else S.pets[g.pet].sh+=2;mbDirty();rebuildParty();res.push(`Pet: ${PETS[g.pet].n}`)}
+ if(g.cos&&COS[g.cos]){giveCos(g.cos,true);res.push(`Visual: ${COS[g.cos].n}`)}
+ reveal('Presente do Game Master',icon('crown','#e2443c'),[{r:g.it?g.it.r:4,html:`<div style="font-size:18px">${g.msg?`“${esc(g.msg)}”<br><br>`:''}${res.join('<br>')||'Uma mensagem para você!'}</div>`}]);save();cloudSave(true);setTimeout(checkGrants,4000)}
+function applyOp(g){S.gclaim[g.id]=1;let txt='';
+ if(g.op==='addlvl'){const n=clamp(g.val|0,1,300);S.heroes.forEach(h=>{const d=Math.min(300,h.lvl+n)-h.lvl;h.lvl+=d;h.sp+=d});txt=`Seus heróis ganharam ${n} níveis!`}
+ if(g.op==='setstage'){const st=Math.max(1,g.val|0);S.ch=null;S.stage=st;S.wave=1;S.farm=false;S.maxStage=Math.max(S.maxStage,st);txt=`Você foi levado para a fase ${st}.`}
+ if(g.op==='kick'){S.guild='';S.gcon=0;S.guildLv=0;txt='Você foi removido da guilda.'}
+ if(g.op==='reset'){const keep={nick:S.nick,owner:S.owner,gclaim:S.gclaim,v:S.v};S=Object.assign(fresh(),keep);txt='Seu progresso foi reiniciado pelo Game Master.'}
+ B.heroes=[];B.enemies=[];if(S.heroes.length){rebuildParty();spawnWave()}else buildPartyBars();save();cloudSave(true);syncProfile(true);renderPanel();hud();
+ modal(`<h2>Aviso do Game Master</h2><div style="font-size:18px">${txt}${g.msg?`<br><br>“${esc(g.msg)}”`:''}</div><div class="btns"><button class="btn gld" data-a="${S.heroes.length?'close':'restart'}">OK</button></div>`,true);setTimeout(checkGrants,2500)}
+function showAnn(){const el=$('#ann');if(!el)return;const a=NET.ann;if(!a||!a.t||(a.at&&a.at>Date.now())||Date.now()-(a.at||a.ts)>3*864e5||S.annSeen===a.ts){el.style.display='none';if(a&&a.at>Date.now())setTimeout(showAnn,Math.min(6e4,a.at-Date.now()+500));return}el.style.display='';el.innerHTML=`<img src="${icon('crown','#e2443c')}" class="ti"> <span>${esc(a.t)}</span><i data-a="annx">✕</i>`}
 const isGM=id=>NET.gms&&NET.gms.has(id);
 const gmBadge=id=>isGM(id)?' <span class="gmb">GM</span>':'';
-function gmHTML(){if(!NET.gm)return'<div class="mut">Acesso restrito.</div>';const pl=NET.players.slice().sort((a,b)=>(a.n||'').localeCompare(b.n||''));const evo=EVO&&EVO.until>Date.now()?EVS.find(e=>e.id===EVO.id):null;
- return`<div class="evb"><b>PAINEL DO GAME MASTER</b><br>Tudo o que você faz aqui vale para todos os jogadores.</div>
- <h3>ANÚNCIO GLOBAL</h3><textarea id="gmAnn" maxlength="200" rows="3">${esc(NET.ann&&NET.ann.t||'')}</textarea><div class="btns"><button class="btn sm gld" data-a="gmann">Publicar anúncio</button><button class="btn sm gry" data-a="gmannclr">Remover</button></div>
+const banState=b=>b&&b.until>Date.now()?b:null;
+const hardBan=()=>{const b=banState(NET.ban);return b&&b.type==='ban'?b:null};
+function onBan(){const b=hardBan();if(b){modal(`<h2 class="rd">Conta banida</h2><div style="font-size:18px">Sua conta está suspensa ${b.until-Date.now()>3e11?'permanentemente':'até <b>'+new Date(b.until).toLocaleString('pt-BR')+'</b>'}.${b.r?`<br><br>Motivo: ${esc(b.r)}`:''}</div><div class="btns"><button class="btn red" data-a="logout">Sair da conta</button></div>`,true)}else if($('#mbox h2.rd'))closeM()}
+function logGM(a,target,d){if(!NET.ok)return;NET.db.collection('gmlog').add({a,t:target||'',d:d||'',ts:Date.now(),by:NET.uid,bn:S.nick}).catch(()=>{})}
+async function loadGmLog(){const el=$('#gmlog');if(!el)return;try{const q=await NET.db.collection('gmlog').orderBy('ts','desc').limit(30).get();el.innerHTML=q.docs.length?q.docs.map(d=>{const x=d.data();return`<div class="glog"><small>${new Date(x.ts).toLocaleString('pt-BR')}</small> <b>${esc(x.bn||'GM')}</b> ${esc(x.a)}${x.t?` <span class="g">${esc(x.t)}</span>`:''}${x.d?` <span class="mut">${esc(x.d)}</span>`:''}</div>`}).join(''):'<div class="mut">Nenhuma ação registrada.</div>'}catch(e){el.innerHTML='<div class="mut">Histórico indisponível (confira as regras do Firebase).</div>'}}
+const pName=id=>{const p=NET.players.find(x=>x.id===id);return p?p.n:id==='all'?'todos':'jogador'};
+const typeOpts=sl=>Object.keys(ITY[sl]).map(t=>`<option value="${t}">${ITY[sl][t].n}</option>`).join('');
+function gmHTML(){if(!NET.gm)return'<div class="mut">Acesso restrito.</div>';setTimeout(loadGmLog,50);const pl=NET.players.slice().sort((a,b)=>(a.n||'').localeCompare(b.n||''));const now=Date.now(),evo=EVO&&EVO.until>now?EVO:null,ev=evo?(evo.id==='custom'?{n:evo.n}:EVS.find(e=>e.id===evo.id)):null;
+ const gl=NET.guilds.map(g=>guildInfo(g.id)).filter(Boolean);
+ return`<div class="evb"><b>PAINEL DO GAME MASTER</b><br>Tudo aqui vale para todos os jogadores e fica no histórico.</div><div class="btns"><button class="btn sm gry" data-a="gmref">Atualizar painel</button></div>
+ <h3>ANÚNCIO GLOBAL</h3><textarea id="gmAnn" maxlength="200" rows="3">${esc(NET.ann&&NET.ann.t||'')}</textarea>
+ <div class="gmf"><label>Publicar daqui a (horas, 0 = agora)<input id="gmAnnH" type="number" min="0" max="720" value="0"></label></div>
+ <div class="btns"><button class="btn sm gld" data-a="gmann">Publicar anúncio</button><button class="btn sm gry" data-a="gmannclr">Remover</button></div>
  <h3 style="margin-top:8px">ENVIAR PRESENTE</h3>
- <div class="gmf"><label>Para<select id="gmTo"><option value="all">Todos os jogadores</option>${pl.map(p=>`<option value="${esc(p.id)}">${esc(p.n)}</option>`).join('')}</select></label>
- <label>Gemas<input id="gmGem" type="number" min="0" value="0"></label><label>Chaves<input id="gmKey" type="number" min="0" value="0"></label><label>Ovos<input id="gmEgg" type="number" min="0" value="0"></label><label>Ouro (min de farm)<input id="gmGold" type="number" min="0" value="0"></label>
- <label>Item<select id="gmItem"><option value="">Nenhum</option>${RAR.map((r,i)=>`<option value="${i}">${r.n}</option>`).join('')}</select></label><label>Mensagem<input id="gmMsg" maxlength="120"></label></div>
+ <div class="gmf"><label style="grid-column:span 2">Para<select id="gmTo"><option value="all">Todos os jogadores</option>${pl.map(p=>`<option value="${esc(p.id)}">${esc(p.n)}</option>`).join('')}</select></label>
+ <label>Gemas<input id="gmGem" type="number" min="0" value="0"></label><label>Chaves<input id="gmKey" type="number" min="0" value="0"></label>
+ <label>Ovos<input id="gmEgg" type="number" min="0" value="0"></label><label>Ouro (min de farm)<input id="gmGold" type="number" min="0" value="0"></label></div>
+ <div class="gmbox"><b>Item</b><div class="gmf"><label>Espaço<select id="gmSlot"><option value="">Nenhum item</option>${SLOTS.map(s=>`<option value="${s}">${SLN[s]}</option>`).join('')}</select></label><label>Tipo<select id="gmType"></select></label>
+ <label>Raridade<select id="gmRar">${RAR.map((r,i)=>`<option value="${i}" ${i===4?'selected':''}>${r.n}</option>`).join('')}</select></label><label>Aprimoramento<select id="gmEn">${Array.from({length:16},(_,i)=>`<option value="${i}">+${i}</option>`).join('')}</select></label></div>
+ <div class="mut" style="font-size:14px">O nível do item acompanha a fase do jogador. Lendários ou melhores vêm com efeitos especiais.</div></div>
+ <div class="gmf"><label>Pet<select id="gmPet"><option value="">Nenhum</option>${Object.keys(PETS).map(k=>`<option value="${k}">${PETS[k].n}</option>`).join('')}</select></label><label>Visual<select id="gmCos"><option value="">Nenhum</option>${Object.keys(COS).map(k=>`<option value="${k}">${COS[k].n}</option>`).join('')}</select></label>
+ <label style="grid-column:span 2">Mensagem<input id="gmMsg" maxlength="120"></label><label>Entregar daqui a (horas)<input id="gmAt" type="number" min="0" max="720" value="0"></label></div>
  <div class="btns"><button class="btn sm blu" data-a="gmgrant">Enviar presente</button></div>
- <h3 style="margin-top:8px">EVENTO</h3><div style="font-size:17px">${evo?`Ativo: <b class="g">${evo.n}</b> até ${new Date(EVO.until).toLocaleString('pt-BR')}`:'Nenhum evento forçado (o automático roda de sexta a domingo).'}</div>
- <div class="gmf"><label>Evento<select id="gmEv">${EVS.map(e=>`<option value="${e.id}">${e.n} (${e.d})</option>`).join('')}</select></label><label>Duração (horas)<input id="gmEvH" type="number" min="1" max="168" value="24"></label></div>
- <div class="btns"><button class="btn sm pur" data-a="gmevent">Iniciar evento</button>${evo?'<button class="btn sm gry" data-a="gmevend">Encerrar</button>':''}</div>
- <h3 style="margin-top:8px">JOGADORES <span>${pl.length}</span></h3>${pl.map(p=>`<div class="li" data-a="pcard" data-v="${esc(p.id)}"><span class="onl ${p.ts&&Date.now()-p.ts<3e5?'y':''}"></span><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}<br><span class="mut">Fase ${p.ms|0} · Poder ${fmt(p.pw||0)}</span></div></div>`).join('')}
- <div class="mut" style="font-size:14px;margin-top:6px">Toque num jogador para silenciar ou banir. No chat, toque no ✕ para apagar mensagens.</div>`}
-function banState(b){return b&&b.until>Date.now()?b:null}
+ <h3 style="margin-top:8px">EVENTO</h3><div style="font-size:17px">${ev?`${evo.start>now?'Agendado':'Ativo'}: <b class="g">${esc(ev.n)}</b> ${evo.start>now?'começa '+new Date(evo.start).toLocaleString('pt-BR')+' ·':''} até ${new Date(evo.until).toLocaleString('pt-BR')}`:'Nenhum evento do GM (o automático roda de sexta a domingo).'}</div>
+ <div class="gmf"><label style="grid-column:span 2">Evento<select id="gmEv">${EVS.map(e=>`<option value="${e.id}">${e.n} (${e.d})</option>`).join('')}<option value="custom">Personalizado...</option></select></label>
+ <div id="gmCustom" class="gmf" style="grid-column:span 2;display:none"><label style="grid-column:span 2">Nome do evento<input id="gmEvN" maxlength="30" value="Evento Especial"></label><label>XP x<input id="gmEvXp" type="number" min="1" max="10" step=".5" value="2"></label><label>Ouro x<input id="gmEvGold" type="number" min="1" max="10" step=".5" value="2"></label><label>Sorte +%<input id="gmEvLuck" type="number" min="0" max="300" value="0"></label><label>Chefes x ouro<input id="gmEvBoss" type="number" min="0" max="10" value="0"></label></div>
+ <label>Começa daqui a (horas)<input id="gmEvS" type="number" min="0" max="720" value="0"></label><label>Duração (horas)<input id="gmEvH" type="number" min="1" max="336" value="24"></label></div>
+ <div class="btns"><button class="btn sm pur" data-a="gmevent">Iniciar/agendar</button>${ev?'<button class="btn sm gry" data-a="gmevend">Encerrar</button>':''}</div>
+ <h3 style="margin-top:8px">JOGADORES <span>${pl.length}</span></h3>${pl.map(p=>`<div class="li" data-a="pcard" data-v="${esc(p.id)}"><span class="onl ${p.ts&&now-p.ts<3e5?'y':''}"></span><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}<br><span class="mut">Fase ${p.ms|0} · Poder ${fmt(p.pw||0)}</span></div><span class="mut">›</span></div>`).join('')}
+ <h3 style="margin-top:8px">GUILDAS <span>${gl.length}</span></h3>${gl.length?gl.map(g=>`<div class="li"><div class="tx"><b>${esc(g.name)}</b> <span class="mut">[${esc(g.tag)}]</span><br><span class="mut">${g.mem.length} membros · Nv ${g.lv}</span></div><button class="btn sm red" data-a="gmgdel" data-v="${esc(g.id)}">Apagar</button></div>`).join(''):'<div class="mut">Nenhuma guilda.</div>'}
+ <h3 style="margin-top:8px">CHAT</h3><div class="btns"><button class="btn sm red" data-a="gmclear">Limpar chat público</button></div>
+ <h3 style="margin-top:8px">HISTÓRICO</h3><div id="gmlog" class="mut">Carregando...</div>`}
+function gmCardHTML(id){return`<div class="gmbox"><b class="rd">Moderação (GM)</b><div id="banst" class="mut" style="font-size:16px">Verificando punições...</div>
+ <div class="gmf"><label>Punição<select id="pnType"><option value="mute">Silenciar (só chat)</option><option value="ban">Banir (bloqueia a conta)</option></select></label><label>Duração<select id="pnDur"><option value="0.0417">1 hora</option><option value="1" selected>24 horas</option><option value="7">7 dias</option><option value="30">30 dias</option><option value="36500">Permanente</option></select></label>
+ <label style="grid-column:span 2">Motivo<input id="pnWhy" maxlength="80"></label></div><div class="btns"><button class="btn sm red" data-a="gmpunish" data-v="${esc(id)}">Aplicar punição</button><button class="btn sm gry" data-a="gmunban" data-v="${esc(id)}">Perdoar</button></div>
+ <b>Conta do jogador</b><div class="gmf"><label>Níveis<input id="opLvl" type="number" min="1" max="300" value="10"></label><label>Fase<input id="opSt" type="number" min="1" value="1"></label></div>
+ <div class="btns"><button class="btn sm blu" data-a="gmop" data-v="addlvl:${esc(id)}">Dar níveis</button><button class="btn sm blu" data-a="gmop" data-v="setstage:${esc(id)}">Levar à fase</button><button class="btn sm gry" data-a="gmop" data-v="kick:${esc(id)}">Tirar da guilda</button>
+ <button class="btn sm red" data-a="gmop" data-v="reset:${esc(id)}">Resetar progresso</button><button class="btn sm red" data-a="gmdel" data-v="${esc(id)}">Excluir jogador</button></div></div>`}
+const gmConfirm=(txt,act,v)=>modal(`<h2 class="rd">Tem certeza?</h2><div style="font-size:18px">${txt}</div><div class="btns"><button class="btn red" data-a="${act}" data-v="${esc(v)}">Sim, confirmar</button><button class="btn gry" data-a="close">Cancelar</button></div>`);
+const gmFail=()=>toast('Sem permissão de GM (confira as regras do Firebase).');
+Object.assign(ACT,{
+ gmref:async()=>{await refreshPlayers(true);renderPanel()},
+ restart:()=>{closeM();if(!S.heroes.length)modal(classPick(true),true)},
+ gmann:async()=>{const t=($('#gmAnn').value||'').trim().slice(0,200);if(!t)return;const h=Math.max(0,+$('#gmAnnH').value||0);try{await NET.db.doc('config/announce').set({t,ts:Date.now(),at:Date.now()+h*36e5,by:NET.uid});logGM('publicou anúncio','',h?`em ${h}h`:'');toast(h?`Anúncio agendado para daqui a ${h}h.`:'Anúncio publicado!')}catch(e){gmFail()}},
+ gmannclr:async()=>{try{await NET.db.doc('config/announce').delete();logGM('removeu o anúncio');toast('Anúncio removido.');renderPanel()}catch(e){gmFail()}},
+ gmgrant:async()=>{const n=id=>Math.max(0,Math.min(1e5,parseInt($(id).value)||0));const g={to:$('#gmTo').value,gems:n('#gmGem'),keys:n('#gmKey'),eggs:n('#gmEgg'),gmin:n('#gmGold'),msg:($('#gmMsg').value||'').slice(0,120),ts:Date.now(),by:NET.uid};
+  const sl=$('#gmSlot').value;if(sl)g.it={s:sl,t:$('#gmType').value,r:+$('#gmRar').value,en:+$('#gmEn').value};if($('#gmPet').value)g.pet=$('#gmPet').value;if($('#gmCos').value)g.cos=$('#gmCos').value;const h=n('#gmAt');if(h)g.at=Date.now()+h*36e5;
+  if(!g.gems&&!g.keys&&!g.eggs&&!g.gmin&&!g.it&&!g.pet&&!g.cos&&!g.msg)return toast('Escolha algo para enviar.');try{await NET.db.collection('grants').add(g);const d=[g.gems&&g.gems+' gemas',g.keys&&g.keys+' chaves',g.eggs&&g.eggs+' ovos',g.gmin&&g.gmin+' min ouro',g.it&&RAR[g.it.r].n+' '+ITY[g.it.s][g.it.t].n+(g.it.en?' +'+g.it.en:''),g.pet&&PETS[g.pet].n,g.cos&&COS[g.cos].n].filter(Boolean).join(', ');logGM('enviou presente para',pName(g.to),d);toast(h?`Presente agendado (${h}h).`:'Presente enviado!');SND.play('coin')}catch(e){gmFail()}},
+ gmevent:async()=>{const id=$('#gmEv').value,h=Math.max(1,Math.min(336,+$('#gmEvH').value||24)),s=Math.max(0,+$('#gmEvS').value||0),st=Date.now()+s*36e5;const d={id,start:st,until:st+h*36e5,by:NET.uid};
+  if(id==='custom'){d.n=($('#gmEvN').value||'Evento Especial').slice(0,30);d.xp=clamp(+$('#gmEvXp').value||1,1,10);d.gold=clamp(+$('#gmEvGold').value||1,1,10);d.luck=clamp((+$('#gmEvLuck').value||0)/100,0,3);d.boss=clamp(+$('#gmEvBoss').value||0,0,10);const p=[];if(d.xp>1)p.push(`XP x${d.xp}`);if(d.gold>1)p.push(`ouro x${d.gold}`);if(d.luck)p.push(`+${Math.round(d.luck*100)}% raridade`);if(d.boss)p.push(`chefes x${d.boss}`);d.d=p.join(', ')||'Evento especial'}
+  try{await NET.db.doc('config/event').set(d);logGM(s?'agendou evento':'iniciou evento',d.n||EVS.find(e=>e.id===id).n,`${h}h${s?' em '+s+'h':''}`);toast(s?'Evento agendado!':'Evento iniciado para todos!');setTimeout(renderPanel,300)}catch(e){gmFail()}},
+ gmevend:async()=>{try{await NET.db.doc('config/event').delete();logGM('encerrou o evento');toast('Evento encerrado.');renderPanel()}catch(e){gmFail()}},
+ gmpunish:async v=>{const type=$('#pnType').value,days=+$('#pnDur').value,r=($('#pnWhy').value||'').slice(0,80);try{await NET.db.doc('bans/'+v).set({type,until:Date.now()+days*864e5,r,by:NET.uid,ts:Date.now()});const dl=days>3e4?'permanente':days<1?'1 hora':days+' dia(s)';logGM(type==='ban'?'baniu':'silenciou',pName(v),dl+(r?' · '+r:''));toast(type==='ban'?`Jogador banido (${dl}).`:`Jogador silenciado (${dl}).`);playerCard(v)}catch(e){gmFail()}},
+ gmunban:async v=>{try{await NET.db.doc('bans/'+v).delete();logGM('perdoou',pName(v));toast('Punição removida.');playerCard(v)}catch(e){gmFail()}},
+ gmop:v=>{const[op,id]=v.split(':');const val=op==='addlvl'?+$('#opLvl').value||10:op==='setstage'?+$('#opSt').value||1:0;if(op==='reset')return gmConfirm(`Resetar todo o progresso de <b>${esc(pName(id))}</b>? Não dá para desfazer.`,'gmopok',`reset:${id}:0`);ACT.gmopok(`${op}:${id}:${val}`)},
+ gmopok:async v=>{const[op,id,val]=v.split(':');try{await NET.db.collection('grants').add({to:id,op,val:+val||0,ts:Date.now(),by:NET.uid});const L={addlvl:'deu '+val+' níveis para',setstage:'levou à fase '+val,kick:'tirou da guilda',reset:'resetou o progresso de'};logGM(L[op],pName(id));toast('Comando enviado. Aplica quando o jogador entrar.');closeM()}catch(e){gmFail()}},
+ gmdel:v=>gmConfirm(`Excluir <b>${esc(pName(v))}</b>? A conta fica banida para sempre, sai do ranking e o progresso é apagado.`,'gmdelok',v),
+ gmdelok:async v=>{try{await NET.db.doc('bans/'+v).set({type:'ban',until:Date.now()+36500*864e5,r:'Conta excluída',by:NET.uid,ts:Date.now()});await NET.db.collection('grants').add({to:v,op:'reset',ts:Date.now(),by:NET.uid});await NET.db.doc('players/'+v).delete();logGM('excluiu',pName(v));closeM();toast('Jogador excluído.');await refreshPlayers(true);renderPanel()}catch(e){gmFail()}},
+ gmgdel:v=>gmConfirm('Apagar esta guilda? Os membros ficam sem guilda.','gmgdelok',v),
+ gmgdelok:async v=>{const g=NET.guilds.find(x=>x.id===v);try{await NET.db.doc('guilds/'+v).delete();logGM('apagou a guilda',g?g.name:v);closeM();toast('Guilda apagada.');await refreshPlayers(true);renderPanel()}catch(e){gmFail()}},
+ gmclear:()=>gmConfirm('Apagar todas as mensagens do chat público?','gmclearok',''),
+ gmclearok:async()=>{closeM();const list=(NET.allChat||[]).filter(m=>m.ch==='g');let n=0;for(const m of list){try{await NET.db.doc('chat/'+m.id).delete();n++}catch(e){}}logGM('limpou o chat',''+n+' mensagens');toast(`${n} mensagens apagadas.`)}});
+document.addEventListener('change',e=>{if(e.target.id==='gmSlot'){const t=$('#gmType');if(t)t.innerHTML=e.target.value?typeOpts(e.target.value):''}if(e.target.id==='gmEv'){const c=$('#gmCustom');if(c)c.style.display=e.target.value==='custom'?'':'none'}});
+
 function myProfile(){const pw=B.heroes.reduce((a,u)=>a+power(u.st),0),main=S.heroes[0];
  return{n:S.nick,c:main?main.cls:'warrior',sb:main&&main.sub||'',lv:Math.max(0,...S.heroes.map(h=>h.lvl)),pw:Math.floor(pw),ms:S.maxStage,rn:S.runes,g:S.guild||'',fr:S.friends.slice(0,50),gc:Math.floor(S.gcon||0),hs:S.heroes.map(h=>h.cls),tw:S.tw.max,ti:S.title||''}}
-async function syncProfile(force){if(!NET.ok)return;const p=myProfile(),k=JSON.stringify(p);if(!force&&k===NET.lastSync&&Date.now()-NET.lastSyncT<18e4)return;NET.lastSync=k;NET.lastSyncT=Date.now();
+async function syncProfile(force){if(!NET.ok||hardBan())return;const p=myProfile(),k=JSON.stringify(p);if(!force&&k===NET.lastSync&&Date.now()-NET.lastSyncT<18e4)return;NET.lastSync=k;NET.lastSyncT=Date.now();
  try{await NET.db.doc('players/'+NET.uid).set(Object.assign(p,{ts:Date.now()}))}catch(e){}}
 async function refreshPlayers(force){if(!NET.ok)return;if(!force&&Date.now()-NET.pT<15000)return;NET.pT=Date.now();
  try{const[ps,gs]=await Promise.all([NET.db.collection('players').orderBy('ms','desc').limit(300).get(),NET.db.collection('guilds').limit(100).get()]);
@@ -1708,7 +1858,7 @@ function chatHTML(list){if(!list.length)return'<div class="mut" style="text-alig
  return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${gmBadge(m.u)}${m.ti?` <small class="g">«${esc(m.ti)}»</small>`:''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.gm&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
 let socTab='chat',rankBy='ms';
 function chatErr(){return NET.err?`<div class="rd" style="font-size:15px">Erro do servidor: ${esc(NET.err).slice(0,200)}</div>`:''}
-function socialDirty(){const a=document.activeElement;if(tab==='social'&&!(a&&(a.id==='chatIn'||a.tagName==='INPUT')))renderPanel();hudDirty=true}
+function socialDirty(){const a=document.activeElement;if(tab==='social'&&socTab!=='gm'&&!(a&&(a.id==='chatIn'||/INPUT|SELECT|TEXTAREA/.test(a.tagName))))renderPanel();hudDirty=true}
 function tabSocial(){if(socTab==='gm'&&!NET.gm)socTab='chat';
  const tabs=`<div class="tabs">${[['chat','Chat','scroll','#e8d8b0'],['rank','Ranking','crown','#ffd34a'],['guilda','Guilda','shield','#3a6ad8'],['amigos','Amigos','heart','#e2445a']].concat(NET.gm?[['gm','GM','crown','#e2443c']]:[]).map(([k,n,g,c])=>`<button class="${socTab===k?'on':''}" data-a="soctab" data-v="${k}"><img src="${icon(g,c)}">${n}${k==='amigos'&&pendingReq().length+NET.gifts.length?'<i class="dot" style="position:static;margin-left:2px"></i>':''}</button>`).join('')}</div>`;
  if(NET.loading)return`<div class="fr pnl"><h3>SOCIAL</h3><div class="mut" style="padding:14px;text-align:center">Conectando ao reino...</div></div>`;
@@ -1737,11 +1887,11 @@ function tabSocial(){if(socTab==='gm'&&!NET.gm)socTab='chat';
   o+=`<h3 style="margin-top:6px">AMIGOS <span>${mine.length}/50</span></h3>`+(mine.length?mine.map(p=>{const mutual=(p.fr||[]).includes(NET.uid),on=p.ts&&Date.now()-p.ts<3e5,sent=S.gift[p.id]===today();return`<div class="li"><span class="onl ${on?'y':''}"></span><div class="tx" data-a="pcard" data-v="${esc(p.id)}"><b>${esc(p.n)}</b>${mutual?'':' <span class="mut">(pedido enviado)</span>'}<br><span class="mut">${on?'Online':'Offline'} · Fase ${p.ms|0} · Poder ${fmt(p.pw||0)}</span></div><button class="btn sm gld ${!mutual||sent?'dis':''}" data-a="gift" data-v="${esc(p.id)}">${sent?'Enviado':'Presentear'}</button></div>`}).join(''):'<div class="mut" style="font-size:17px">Toque no nome de alguém no chat ou no ranking para adicionar como amigo. Amigos podem trocar presentes diários de ouro.</div>')}
  return o+'</div>'}
 const pendingReq=()=>NET.inReq.filter(p=>!S.friends.includes(p.id));
-function playerCard(id){setTimeout(async()=>{if(!NET.gm)return;const el=$('#banst');if(!el)return;try{const d=await NET.db.doc('bans/'+id).get();const b=d.exists?banState(d.data()):null;el.innerHTML=b?`<span class="rd">Punido até ${new Date(b.until).toLocaleString('pt-BR')}</span>`:'Sem punições.'}catch(e){el.textContent=''}},50);const p=NET.players.find(x=>x.id===id)||NET.inReq.find(x=>x.id===id);if(!p){refreshPlayers(true);return toast('Carregando jogador...')}
+function playerCard(id){setTimeout(async()=>{if(!NET.gm)return;const el=$('#banst');if(!el)return;try{const d=await NET.db.doc('bans/'+id).get();const b=d.exists?banState(d.data()):null;el.innerHTML=b?`<span class="rd">${b.type==='ban'?'Banido':'Silenciado'} ${b.until-Date.now()>3e11?'para sempre':'até '+new Date(b.until).toLocaleString('pt-BR')}</span>${b.r?' · '+esc(b.r):''}`:'Sem punições.'}catch(e){el.textContent=''}},50);const p=NET.players.find(x=>x.id===id)||NET.inReq.find(x=>x.id===id);if(!p){refreshPlayers(true);return toast('Carregando jogador...')}
  const g=guildInfo(p.g),isF=S.friends.includes(id),me=id===NET.uid,cls=CLS[p.c]?p.c:'warrior';
  modal(`<div class="row"><img src="${urlOf(heroFrames(heroLook({id:id.length*13,cls,sub:SUB[p.sb]?p.sb:null,eq:{}})).idle[0])}" style="width:72px;height:72px"><div class="sp"><h2 style="margin:0">${esc(p.n)}</h2>${CLS[cls].n}${SUB[p.sb]?' › '+SUB[p.sb].n:''} · Nv ${p.lv|0}${g?`<br>Guilda: <span class="g">${esc(g.name)}</span>`:''}</div></div>
  <div class="stats" style="margin-top:8px"><div><img src="${icon('map','#e8d8b0')}"><span>Fase máx</span><b>${p.ms|0}</b></div><div><img src="${icon('espada',4)}"><span>Poder</span><b>${fmt(p.pw||0)}</b></div><div><img src="${icon('up','#4ab0ff')}"><span>Torre</span><b>${p.tw|0}</b></div><div><img src="${icon('swords','#cfd6e0')}"><span>Heróis</span><b>${(p.hs||[]).length}</b></div></div>
- ${NET.gm&&!me?`<div id="banst" class="mut" style="margin-top:6px">Verificando punições...</div><div class="btns"><button class="btn sm red" data-a="gmban" data-v="${esc(id)}:1">Silenciar 24h</button><button class="btn sm red" data-a="gmban" data-v="${esc(id)}:30">Banir 30 dias</button><button class="btn sm gry" data-a="gmunban" data-v="${esc(id)}">Perdoar</button></div>`:''}
+ ${NET.gm&&!me?gmCardHTML(id):''}
  <div class="btns">${me?'':isF?`<button class="btn red" data-a="frem" data-v="${esc(id)}">Remover amigo</button>`:`<button class="btn" data-a="fadd" data-v="${esc(id)}">Adicionar amigo</button>`}<button class="btn gry" data-a="close">Fechar</button></div>`)}
 Object.assign(ACT,{
  loginopen:()=>showLogin('in'),loginmode:v=>showLogin(v),
@@ -1753,14 +1903,6 @@ Object.assign(ACT,{
  logout:async()=>{closeM();await cloudSave(true);unsubAll();NET.ok=false;S=fresh();S.offline=0;try{localStorage.removeItem(KEY)}catch(e){}B.heroes=[];B.enemies=[];buildPartyBars();renderPanel();try{await AUTH.signOut()}catch(e){}},
  copyid:()=>{try{navigator.clipboard.writeText(NET.uid);toast('ID copiado!')}catch(e){toast('Não foi possível copiar.')}},
  annx:()=>{S.annSeen=NET.ann&&NET.ann.ts;showAnn();save()},
- gmann:async()=>{const t=($('#gmAnn').value||'').trim().slice(0,200);if(!t)return;try{await NET.db.doc('config/announce').set({t,ts:Date.now(),by:NET.uid});toast('Anúncio publicado!')}catch(e){toast('Sem permissão de GM.')}},
- gmannclr:async()=>{try{await NET.db.doc('config/announce').delete();toast('Anúncio removido.')}catch(e){toast('Sem permissão de GM.')}},
- gmgrant:async()=>{const n=id=>Math.max(0,Math.min(100000,parseInt($(id).value)||0));const g={to:$('#gmTo').value,gems:n('#gmGem'),keys:n('#gmKey'),eggs:n('#gmEgg'),gmin:n('#gmGold'),msg:($('#gmMsg').value||'').slice(0,120),ts:Date.now(),by:NET.uid};const it=$('#gmItem').value;if(it!=='')g.item=+it;
-  if(!g.gems&&!g.keys&&!g.eggs&&!g.gmin&&g.item==null&&!g.msg)return toast('Escolha algo para enviar.');try{await NET.db.collection('grants').add(g);toast('Presente enviado!');SND.play('coin')}catch(e){toast('Sem permissão de GM.')}},
- gmevent:async()=>{const h=Math.max(1,Math.min(168,parseInt($('#gmEvH').value)||24));try{await NET.db.doc('config/event').set({id:$('#gmEv').value,until:Date.now()+h*36e5,by:NET.uid});toast('Evento iniciado para todos!')}catch(e){toast('Sem permissão de GM.')}},
- gmevend:async()=>{try{await NET.db.doc('config/event').delete();toast('Evento encerrado.')}catch(e){toast('Sem permissão de GM.')}},
- gmban:async v=>{const[id,d]=v.split(':');try{await NET.db.doc('bans/'+id).set({until:Date.now()+(+d)*864e5,by:NET.uid,ts:Date.now()});toast(+d>1?'Jogador banido por 30 dias.':'Jogador silenciado por 24h.');playerCard(id)}catch(e){toast('Sem permissão de GM.')}},
- gmunban:async v=>{try{await NET.db.doc('bans/'+v).delete();toast('Punição removida.');playerCard(v)}catch(e){toast('Sem permissão de GM.')}},
  soctab:v=>{socTab=v;renderPanel();if(v==='chat'||v==='guilda'){const el=$('#chatList');if(el)el.scrollTop=el.scrollHeight;NET.unread=0}},
  rankby:v=>{rankBy=v;renderPanel()},refresh:()=>refreshPlayers(true),
  send:v=>sendChat(v),
@@ -1807,6 +1949,11 @@ function wikiSec(){const cl=Object.keys(CLS).map(k=>{const c=CLS[k];return`<div 
  ['renascer','Renascer e Runas','rune','#a35cff',`<p>A partir do <b>andar 200</b> você pode <b>renascer</b> (Loja › Runas). Você volta à fase 1 e perde ouro, melhorias, níveis, habilidades e subclasses, mas mantém equipamentos, gemas, pets, visuais, troféus e runas, e ganha <b>Essência Rúnica</b>.</p><p>Com a essência você evolui <b>runas específicas</b> no Grimório: Força, Vigor, Bastião, Fortuna, Sabedoria, Sorte, Fúria, Pressa, Precisão, Colheita (limite diário), Ferreiro (forja) e Eternidade (tempo offline).</p>`],
  ['gemas','Gemas, forja e bolsa','gem','#3a8aff',`<p><b>Gemas</b> são a moeda especial: vêm de eventos, chefe da guilda, torre, login, conquistas e bestiário (ou compra no app da loja). Com elas você amplia a <b>bolsa</b> (começa com 40, +10 por compra), compra baús, ovos, chaves e pergaminhos de proteção.</p><p>A <b>forja</b> vai até <b>+15</b>. Até +5 nunca falha; depois a chance cai (15% no +15) e falhar a partir do +10 tira 1 nível, a menos que você use um Pergaminho de Proteção.</p><p>A <b>sorte</b> é difícil: Lendários, Míticos e Antiguidades são muito raros. Melhore com Sorte (Loja), Runa da Sorte e eventos.</p><p>O <b>Mercador</b> troca o estoque a cada 4h: itens até Épico por ouro, Lendários ou melhores por gemas.</p>`],
  ['eventos','Login, missões e eventos','star','#ffd34a',`<p>Entre todo dia para a <b>recompensa diária</b> (o 7º dia dá um Baú Lendário). Há missões <b>diárias</b> (ouro e chaves) e <b>semanais</b> (gemas e ovos). De sexta a domingo acontece um <b>evento</b> diferente a cada semana (XP em dobro, Chuva de Ouro, Caçada Rara ou Invasão de Chefes), com tarefas que dão gemas e visuais. <b>Conquistas</b> dão gemas e títulos que aparecem no chat e no ranking.</p>`],
+ ['passe','Passe da Temporada e Roleta','crown','#ff4ad8',`<p>Cada temporada dura cerca de um mês e tem <b>30 níveis</b> de passe. Você ganha XP de passe matando monstros, completando missões, masmorras, andares da Torre e entrando todo dia.</p>
+  <p>A trilha <b>grátis</b> dá ouro, chaves, ovos e gemas. A trilha <b>Premium</b> (${PPRICE} gemas) dá prêmios maiores e <b>visuais exclusivos da temporada</b>, que não voltam depois.</p>
+  <p><b>Roleta diária</b>: 1 giro grátis por dia. Giros extras custam 20 gemas (até 5 por dia). O prêmio raro é o grande pote de gemas.</p>`],
+ ['gm','Game Master e regras','crown','#e2443c',`<p>Os <span class="gmb">GM</span> cuidam do reino: publicam anúncios, criam eventos, enviam presentes e moderam o chat.</p>
+  <p>Ofensas, spam ou trapaça podem render <b>silêncio</b> (só o chat fica bloqueado) ou <b>banimento</b> (a conta fica suspensa). Casos graves levam à exclusão da conta.</p>`],
  ['social','Social: chat, ranking, guildas e amigos','crown','#ffd34a',`<p><b>Chat</b>: fale com todos que jogam pelo mesmo link. <b>Ranking</b>: por fase máxima, poder, runas ou nível. <b>Guildas</b>: crie uma (20K ouro) ou entre numa (até 20 membros). Doar ouro sobe o nível da guilda, e cada nível dá +1% de ouro e XP para todos os membros (até +30%). A guilda tem chat próprio e um <b>Chefe da Guilda</b> semanal com vida compartilhada: cada membro tem 3 ataques por dia, e se o chefe cair todos que atacaram ganham gemas, ovo, item e chance de visual.</p><p><b>Amigos</b>: toque no nome de alguém para adicionar. Quando os dois se adicionam, vocês podem trocar <b>presentes diários</b> de ouro.</p><p class="mut">Os recursos online precisam do servidor do jogo e só funcionam pelo link hospedado.</p>`],
  ['dicas','Dicas rápidas','up','#5cd65c',`<p>• Gaste PH assim que ganhar, priorizando as passivas que aumentam ATQ e as habilidades em área.<br>• Use <i>Equipar melhores</i> sempre que a Bolsa encher.<br>• Ative o auto-vender comuns para não lotar a Bolsa.<br>• Masmorras são a melhor fonte de ouro, XP e itens raros.<br>• Travou feio? Faça masmorras, torre e o bestiário; a partir do andar 200, renasça para evoluir runas.</p>`]]}
 function tabWiki(){return`<div class="fr pnl"><img class="logo-big" src="${LOGO}"><h3>WIKI DO REINO</h3><div class="mut" style="font-size:16px;margin-bottom:6px">Tutorial e guia completo. Toque num tópico para abrir.</div>`+wikiSec().map(([k,t,g,c,h])=>`<div class="wk ${wikiOpen===k?'on':''}"><div class="wk-h" data-a="wiki" data-v="${k}"><img src="${icon(g,c)}"><b>${t}</b><span>${wikiOpen===k?'▲':'▼'}</span></div>${wikiOpen===k?`<div class="wk-b">${h}</div>`:''}</div>`).join('')+`<div class="btns"><button class="btn gld" data-a="tutreset">Rever tutorial guiado</button></div></div>`}

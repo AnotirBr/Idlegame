@@ -48,10 +48,17 @@ service cloud.firestore {
   match /databases/{db}/documents {
     function signed() { return request.auth != null; }
     function gm() { return signed() && exists(/databases/$(db)/documents/admins/$(request.auth.uid)); }
-    function banned() { return exists(/databases/$(db)/documents/bans/$(request.auth.uid)) && get(/databases/$(db)/documents/bans/$(request.auth.uid)).data.until > request.time.toMillis(); }
+    function banDoc() { return get(/databases/$(db)/documents/bans/$(request.auth.uid)).data; }
+    function hasBan() { return exists(/databases/$(db)/documents/bans/$(request.auth.uid)); }
+    function banned() { return hasBan() && banDoc().until > request.time.toMillis(); }
+    function hardBan() { return banned() && banDoc().get('type', 'mute') == 'ban'; }
     match /admins/{uid}  { allow read: if signed(); allow write: if false; }
-    match /saves/{uid}   { allow read, write: if signed() && request.auth.uid == uid; }
-    match /players/{uid} { allow read: if signed(); allow write: if signed() && request.auth.uid == uid; }
+    match /saves/{uid}   { allow read, write: if signed() && request.auth.uid == uid; allow delete: if gm(); }
+    match /players/{uid} {
+      allow read: if signed();
+      allow write: if signed() && request.auth.uid == uid && !hardBan();
+      allow delete: if gm();
+    }
     match /chat/{id} {
       allow read: if signed();
       allow create: if signed() && !banned() && request.resource.data.u == request.auth.uid && request.resource.data.t.size() <= 140;
@@ -60,12 +67,13 @@ service cloud.firestore {
     match /bans/{uid}    { allow read: if signed(); allow write: if gm(); }
     match /config/{id}   { allow read: if signed(); allow write: if gm(); }
     match /grants/{id}   { allow read: if signed(); allow write: if gm(); }
-    match /guilds/{id}   { allow read, write: if signed(); }
-    match /gboss/{id}    { allow read, write: if signed(); }
-    match /gdmg/{id}     { allow read: if signed(); allow write: if signed() && request.resource.data.u == request.auth.uid; }
+    match /gmlog/{id}    { allow read, write: if gm(); }
+    match /guilds/{id}   { allow read: if signed(); allow write: if signed() && !hardBan(); allow delete: if gm() || (signed() && !hardBan()); }
+    match /gboss/{id}    { allow read, write: if signed() && !hardBan(); }
+    match /gdmg/{id}     { allow read: if signed(); allow write: if signed() && !hardBan() && request.resource.data.u == request.auth.uid; }
     match /gifts/{id} {
       allow read: if signed();
-      allow create: if signed() && request.resource.data.from == request.auth.uid;
+      allow create: if signed() && !hardBan() && request.resource.data.from == request.auth.uid;
       allow delete: if signed() && resource.data.to == request.auth.uid;
     }
   }
