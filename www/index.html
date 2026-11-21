@@ -248,6 +248,13 @@ textarea{width:100%;font-family:'VT323';font-size:18px;background:#0b090c;color:
 
 .gmbox{border:2px solid #000;box-shadow:inset 0 0 0 1px #5a4a3a;background:#1a1410;padding:6px;margin:6px 0}.gmbox>b{display:block;margin:4px 0;font-size:17px}
 .glog{font-size:15px;padding:3px 0;border-bottom:1px solid #2a2018}.glog small{color:#8a7a68}
+
+.tit{font-weight:bold;white-space:nowrap}
+.titL{text-shadow:0 0 4px #ff9a00,0 0 1px #000;animation:tgl 1.6s ease-in-out infinite alternate}
+@keyframes tgl{to{text-shadow:0 0 9px #ffd34a,0 0 2px #fff}}
+.titX{background:linear-gradient(90deg,#ff5a5a,#ffd34a,#5cff8a,#4ab0ff,#ff6ae8,#ff5a5a);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 2s linear infinite;filter:drop-shadow(0 0 3px #ff4ad8aa)}
+
+.tavw{margin:6px 0}#tav{width:100%;aspect-ratio:208/112;display:block;border:2px solid #000;box-shadow:inset 0 0 0 1px #5a3a22,0 0 0 1px #3a2414;image-rendering:pixelated;cursor:pointer;background:#2a1a10}
 </style>
 </head>
 <body>
@@ -559,7 +566,7 @@ swords:[[x=>{x.lineWidth=2;x.beginPath();x.moveTo(2,2);x.lineTo(13,13);x.moveTo(
 function symPB(name,col){const b=new PB(16,16),C=ramp(col);(SYM[name]||SYM.star).forEach(([fn,c])=>{const rc=c==='c'?C:c==='d'?C[0]:ramp(c);b.mask(pmask(fn),rc)});return b.outline(OUT)}
 function wpnIconPB(t,r){const w=wpnPB(t,r),b=new PB(16,16);rotMap(w.pb,Math.floor(w.pb.w/2),Math.floor(w.pb.h/2),Math.PI/4).forEach(([dx,dy,c])=>b.s(8+dx,8+dy,c));return b.outline(OUT)}
 const ICN={};
-function icon(name,col){const k=name+'|'+col;if(ICN[k])return ICN[k];const b=WPN[name]?wpnIconPB(name,col|0):symPB(name,col||'#cccccc');return ICN[k]=b.toC().toDataURL()}
+function icon(name,col){const k=name+'|'+col;if(ICN[k])return ICN[k];const b=WPN[name]?wpnIconPB(name,col|0):symPB(name,col||'#cccccc');return ICN[k]=hdURL(b.toC())}
 function skillIcon(s){const k='SK'+s.id;if(ICN[k])return ICN[k];const E=ramp(EL[s.e][0]),b=new PB(20,20);
  const bg0=mix(E[0],'#0a0810',.55),bg1=mix(E[0],'#0a0810',.72),bg2=mix(E[0],'#0a0810',.84);
  for(let y=1;y<19;y++)for(let x=1;x<19;x++){const d=Math.hypot(x-9.5,y-8)/12;b.s(x,y,d<.45?bg0:d<.8?bg1:bg2)}
@@ -567,7 +574,7 @@ function skillIcon(s){const k='SK'+s.id;if(ICN[k])return ICN[k];const E=ramp(EL[
  for(let i=0;i<20;i++){b.s(i,0,OUT);b.s(i,19,OUT);b.s(0,i,OUT);b.s(19,i,OUT)}
  for(let i=1;i<19;i++){b.s(i,1,F[2]);b.s(1,i,F[2]);b.s(i,18,F[0]);b.s(18,i,F[0])}
  b.s(1,1,F[3]);if(s.ult){b.s(1,18,'#ff3a3a');b.s(18,1,'#ff3a3a');b.s(18,18,'#ff3a3a')}
- b.blit(WPN[s.i]?wpnIconPB(s.i,s.ult?4:2):symPB(s.i,EL[s.e][0]),2,2);return ICN[k]=b.toC().toDataURL()}
+ b.blit(WPN[s.i]?wpnIconPB(s.i,s.ult?4:2):symPB(s.i,EL[s.e][0]),2,2);return ICN[k]=hdURL(b.toC())}
 function itemPB(slot,t,r){
  if(slot==='arma')return wpnIconPB(t,r);
  if(slot==='elmo'){const b=new PB(32,32),L={helm:t,helmR:r,helmC:['#5a4a8a','#3a6a3a','#2a5ab8','#6a2a9a','#b8641a','#a01a1a','#c83ad8'][r],cloth:'#5a4a8a'};
@@ -581,7 +588,7 @@ function itemPB(slot,t,r){
  else if(t==='talisma'){b.ell(8,8.5,6,7,ramp('#6a6a80'));b.mask(pmask(x=>{x.lineWidth=1.4;x.beginPath();x.moveTo(8,4);x.lineTo(8,13);x.moveTo(5,6);x.lineTo(11,11);x.moveTo(11,6);x.lineTo(5,11);x.stroke()}),E[2])}
  else{b.rr(5,12,6,3,Gd);b.r(7,9,2,3,Gd[1]);b.ell(8,6,4.5,4.5,E);b.s(6,4,'#ffffff')}
  return b.outline(OUT)}
-function itemIcon(it){const k='I'+it.s+it.t+it.r;return ICN[k]||(ICN[k]=itemPB(it.s,it.t,it.r).toC().toDataURL())}
+function itemIcon(it){const k='I'+it.s+it.t+it.r;return ICN[k]||(ICN[k]=hdURL(itemPB(it.s,it.t,it.r).toC()))}
 function slotIcon(s){const k='SL'+s;return ICN[k]||(ICN[k]=(()=>{const p=itemPB(s,{arma:'espada',elmo:'elmo',armadura:'placas',anel:'anel'}[s],0);p.d=p.d.map(v=>v?(v===OUT?'#2a2420':'#4a4038'):0);return p.toC().toDataURL()})())}
 /* ================= FRAMES (UI 9-slice) ================= */
 function frameURL(p,stud){const S=12,b=new PB(S*2+2,S*2+2),W=b.w;
@@ -589,6 +596,14 @@ function frameURL(p,stud){const S=12,b=new PB(S*2+2,S*2+2),W=b.w;
  for(let y=p.length;y<W-p.length;y++)for(let x=p.length;x<W-p.length;x++)b.s(x,y,p.fill||p[p.length-1]);
  if(stud){const G=ramp(stud);for(const[cx,cy]of[[2,2],[W-6,2],[2,W-6],[W-6,W-6]]){b.r(cx,cy,4,4,G[1]);b.s(cx,cy,G[3]);b.s(cx+1,cy,G[2]);b.s(cx,cy+1,G[2]);b.r(cx+3,cy,1,4,G[0]);b.r(cx,cy+3,4,1,G[0]);b.s(cx-1,cy+1,OUT);b.s(cx+1,cy-1,OUT)}}
  return b.toC(2).toDataURL()}
+/* ---------- HD: Scale2x/EPX (2x e 4x) para sprites mais definidos ---------- */
+function scale2x(c){const w=c.width,h=c.height;if(!w||!h)return c;const S32=new Uint32Array(c.getContext('2d').getImageData(0,0,w,h).data.buffer),o=cnv(w*2,h*2),ox=o.getContext('2d'),od=ox.createImageData(w*2,h*2),O=new Uint32Array(od.data.buffer),W2=w*2;
+ for(let y=0;y<h;y++){const ym=(y>0?y-1:y)*w,yc=y*w,yp=(y<h-1?y+1:y)*w;for(let x=0;x<w;x++){const P=S32[yc+x],A=S32[ym+x],D=S32[yp+x],C=S32[yc+(x>0?x-1:x)],Bc=S32[yc+(x<w-1?x+1:x)];
+  const i=(y*2)*W2+x*2;O[i]=(C===A&&C!==D&&A!==Bc)?A:P;O[i+1]=(A===Bc&&A!==C&&Bc!==D)?Bc:P;O[i+W2]=(D===C&&D!==Bc&&C!==A)?C:P;O[i+W2+1]=(Bc===D&&Bc!==A&&D!==C)?D:P}}
+ ox.putImageData(od,0,0);return o}
+function HD(c,n){n=n||4;const k='_hd'+n;if(c[k])return c[k];let o=c;for(let s=1;s<n;s*=2)o=scale2x(o);o._s=n;return c[k]=o}
+const hdURL=c=>HD(c,4).toDataURL();
+function drawHD(x,c,dx,dy,w,h,n,px){const sm=x.imageSmoothingEnabled;x.imageSmoothingEnabled=!px;x.imageSmoothingQuality='high';x.drawImage(HD(c,n||4),dx,dy,w==null?c.width:w,h==null?c.height:h);x.imageSmoothingEnabled=sm}
 
 /* ================= BACKGROUNDS (parallax) ================= */
 const BW=256,BH=144,GY=120;
@@ -779,7 +794,7 @@ function mkBiome(k){const i=['dungeon','crypt','lava','forest','ice','swamp','de
  return{n:'Picos Gelados',L:[{c:sk,sp:0},{c:m1,sp:.1},{c:m2,sp:.25},{c:m3,sp:.55},{c:g,sp:1,y:112}],sky:'#06061e',amb:'snow',
   skyAnim:(x,T)=>{x.save();x.globalCompositeOperation='lighter';for(let k=0;k<3;k++){x.fillStyle=['rgba(80,255,170,.10)','rgba(80,200,255,.09)','rgba(170,110,255,.07)'][k];for(let xx=0;xx<BW;xx+=2){const y=22+k*7+Math.sin(xx*.03+T*.5+k*1.7)*7+Math.sin(xx*.011+T*.2)*5;x.fillRect(xx,y|0,2,12+k*3)}}x.restore()}}}
 const BIOC={};const biomeArt=i=>{const k=bioOf(i).bg;return BIOC[k]||(BIOC[k]=mkBiome(k))};
-function drawBiome(x,i,T,s){const b=biomeArt(i);b.L.forEach((l,k)=>{const o=-(((s*l.sp)%BW)+BW)%BW;x.drawImage(l.c,Math.round(o),l.y||0);x.drawImage(l.c,Math.round(o)+BW,l.y||0);if(k===0&&b.skyAnim)b.skyAnim(x,T)});if(b.anim)b.anim(x,T,s)}
+function drawBiome(x,i,T,s){const b=biomeArt(i);b.L.forEach((l,k)=>{const o=-(((s*l.sp)%BW)+BW)%BW;drawHD(x,l.c,Math.round(o),l.y||0,BW,l.c.height,2,1);drawHD(x,l.c,Math.round(o)+BW,l.y||0,BW,l.c.height,2,1);if(k===0&&b.skyAnim)b.skyAnim(x,T)});if(b.anim)b.anim(x,T,s)}
 function biomeThumb(i){const k='TH'+i;if(ICN[k])return ICN[k];const c=cnv(BW,BH),x=c.getContext('2d');x.fillStyle=biomeArt(i).sky;x.fillRect(0,0,BW,BH);drawBiome(x,i,0,0);return ICN[k]=c.toDataURL()}
 
 /* ================= DATA ================= */
@@ -1127,13 +1142,15 @@ function keysNow(){if(S.keys>=KEYMAX){S.keyT=now();return S.keys}while(S.keys<KE
 const UPS={str:{n:'Treinamento',d:'+6% ATQ de todos os heróis',g:'espada',c:2,cost:l=>25*1.25**l},vit:{n:'Vitalidade',d:'+6% VIDA de todos os heróis',g:'heart',c:'#e2445a',cost:l=>25*1.25**l},arm:{n:'Ferraria',d:'+6% DEF de todos os heróis',g:'shield',c:'#8fa8c8',cost:l=>30*1.25**l},gold:{n:'Ganância',d:'+6% ouro por abate',g:'coin',c:'#e8b030',cost:l=>40*1.3**l},xp:{n:'Sabedoria',d:'+6% experiência',g:'book',c:'#4a7aff',cost:l=>40*1.3**l},luck:{n:'Sorte',d:'+2% chance de raridade e +0,2% de loot (máx 10)',g:'star',c:'#5cd65c',cost:l=>300*2**l,max:10}};
 function heroSkills(h){const a=CLS[h.cls].sk.slice();if(h.sub)a.push(...SUB[h.sub].sk);return a}
 const aff=(h,it)=>it&&it.s==='arma'&&AFF[h.cls].includes(it.t);
-function heroTraits(h){const t={};let anc=0;SLOTS.forEach(sl=>{const it=h.eq[sl];if(!it)return;(it.tr||[]).forEach(x=>t[x.id]=(t[x.id]||0)+x.q);if(it.r===6)anc++});t._anc=anc;return t}
+const reqLv=it=>Math.max(1,Math.min(300,Math.round(it.L*.36)));
+const eqF=(h,it)=>{const r=reqLv(it);return h.lvl>=r?1:clamp(h.lvl/r,.25,1)};
+function heroTraits(h){const t={};let anc=0;SLOTS.forEach(sl=>{const it=h.eq[sl];if(!it)return;if(eqF(h,it)<1)return;(it.tr||[]).forEach(x=>t[x.id]=(t[x.id]||0)+x.q);if(it.r===6)anc++});t._anc=anc;return t}
 function partyTraits(){const t={};S.heroes.forEach(h=>{const x=heroTraits(h);for(const k in x)t[k]=(t[k]||0)+x[k]});PTR=t;return t}
 function heroStats(h){const b=CLS[h.cls].base,lm=1.06**(h.lvl-1);const pa={atk:0,hp:0,def:0,crit:0,aspd:0,cdmg:0,ls:0,dodge:0,heal:0};
  if(h.sub)for(const k in SUB[h.sub].bn)pa[k]+=SUB[h.sub].bn[k];
  heroSkills(h).forEach(s=>{const rk=h.sk[s.id]||0;if(rk&&s.p)for(const k in s.p)pa[k]+=s.p[k]*rk});
  const g={atk:0,hp:0,def:0,crit:0,aspd:0,cdmg:0,ls:0,dodge:0,heal:0};
- SLOTS.forEach(sl=>{const it=h.eq[sl];if(!it)return;const em=1+.15*it.en,am=aff(h,it)?1.15:1;for(const k in it.st)g[k]+=(k==='atk'||k==='hp'||k==='def')?it.st[k]*em*(k==='atk'?am:1):it.st[k]});
+ SLOTS.forEach(sl=>{const it=h.eq[sl];if(!it)return;const em=1+.15*it.en,am=aff(h,it)?1.15:1,f=eqF(h,it);for(const k in it.st)g[k]+=((k==='atk'||k==='hp'||k==='def')?it.st[k]*em*(k==='atk'?am:1):it.st[k])*f});
  const mb=metaBonus();['atk','hp','def','heal'].forEach(k=>pa[k]+=mb[k]);g.crit+=mb.crit;g.cdmg+=mb.cdmg;g.aspd+=mb.aspd;
  ['capa','aura','skin'].forEach(t=>{const id=h.cos&&h.cos[t];if(!id||!COS[id])return;const c=COS[id];if(c.k==='all'){pa.atk+=c.v;pa.hp+=c.v;pa.def+=c.v}else if(c.k in pa&&!['crit','aspd','cdmg','ls','dodge'].includes(c.k))pa[c.k]+=c.v;else g[c.k]=(g[c.k]||0)+c.v});
  const tr=heroTraits(h);pa.hp+=.12*(tr.titan||0)+.1*tr._anc;pa.def+=.12*(tr.titan||0)+.1*tr._anc;pa.atk+=.1*tr._anc;g.ls+=.06*(tr.vampiro||0);
@@ -1294,9 +1311,9 @@ function hpBar(x,y,w,v,sh,boss){x=Math.round(x);y=Math.round(y);ctx.fillStyle='#
  if(sh>0){ctx.fillStyle='#bfefff';ctx.fillRect(x,y-2,Math.round(w*Math.min(1,sh)),1)}}
 function drawUnit(u){const img=frameFor(u),sc=u.sc,w=32*sc,h=32*sc,E=u.isE;let x=u.x+u.ox+u.kb,y=GY-30*sc;
  if(u.fly)y-=8+Math.sin(T*4+u.ph)*2;if(E&&u.dead)y+=(.6-u.dt)*10;
- ctx.fillStyle='rgba(0,0,0,.35)';const sw=(u.fly?10:16)*sc;ctx.fillRect(q(x+16*sc-sw/2),GY-1,sw,2);ctx.fillRect(q(x+16*sc-sw/2+2),GY-2,sw-4,1);
+ const sw=(u.fly?10:16)*sc,sg=ctx.createRadialGradient(x+16*sc,GY-1,0,x+16*sc,GY-1,sw*.6);sg.addColorStop(0,'rgba(0,0,0,.45)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.save();ctx.translate(x+16*sc,GY-1);ctx.scale(1,.28);ctx.beginPath();ctx.arc(0,0,sw*.6,0,TAU);ctx.restore();ctx.fill();
  ctx.save();if(E&&u.dead)ctx.globalAlpha=Math.max(0,u.dt/.6);if(!E&&u.dead)ctx.globalAlpha=.55;
- const draw=im=>{if(E){ctx.save();ctx.translate(q(x+w),q(y));ctx.scale(-1,1);ctx.drawImage(im,0,0,w,h);ctx.restore()}else ctx.drawImage(im,q(x),q(y),w,h)};
+ const draw=im=>{if(E){ctx.save();ctx.translate(q(x+w),q(y));ctx.scale(-1,1);drawHD(ctx,im,0,0,w,h);ctx.restore()}else drawHD(ctx,im,q(x),q(y),w,h)};
  draw(img);if(u.flash>0||(E&&u.dead&&u.dt>.45)){ctx.globalAlpha=E&&u.dead?1:Math.min(1,u.flash*10);draw(whiteOf(img))}
  ctx.restore();if(u.dead)return;
  if(u.shield>0){ctx.save();ctx.globalAlpha=.35+.15*Math.sin(T*6);ctx.strokeStyle='#bfefff';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(q(x+16),q(GY-13),13,15,0,0,TAU);ctx.stroke();ctx.restore()}
@@ -1346,7 +1363,7 @@ const LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABoCAYAAAC0RL9wAA
 /* ================= UI ================= */
 let tab='herois',skTab='c',invF='all';
 const NAV=[['herois','Heróis'],['inv','Bolsa'],['mapa','Mapa'],['forja','Forja'],['loja','Loja'],['social','Social'],['miss','Missões'],['wiki','Wiki']];
-const urlOf=c=>c._u||(c._u=c.toDataURL());
+const urlOf=c=>c._u||(c._u=(c.width<=64?HD(c,4):c).toDataURL());
 const gemI=()=>`<img src="${icon('gem','#3a8aff')}">`;
 function initStatic(){const r=document.documentElement.style;
  r.setProperty('--fw',`url(${frameURL(Object.assign(['#0a0605','#4a2c16','#b07a44','#7a4e2a','#3a2412','#160e09'],{fill:'#1e150f'}),'#d8a032')})`);
@@ -1379,7 +1396,7 @@ function tabHerois(){if(!S.heroes.length)return'';const h=S.heroes[S.sel]||S.her
  let o='<div class="hsel">';S.heroes.forEach((x,i)=>{const pf=heroF(x);o+=`<div class="hc ${x===h?'on':''}" data-a="sel" data-v="${i}"><img src="${urlOf(pf.port)}"><b>${x.name}</b><small>Nv ${x.lvl} · ${x.sub?SUB[x.sub].n:CLS[x.cls].n}</small>${canLearnAny(x)?'<i class="dot"></i>':''}</div>`});
  if(S.heroes.length<4){const r=recReq();o+=`<div class="hc add ${recOk()?'':'lk'}" data-a="recruit"><div class="plus">${recOk()?'+':`<img src="${icon('lock','#d8a032')}" style="width:22px;height:22px">`}</div><small>${S.maxStage>=r.st?`<span class="g">${fmt(r.g)}</span> ouro${r.gm?`<br>+${r.gm} gemas`:''}`:`Fase ${r.st}`}${r.p&&S.st.prest<r.p?'<br>1 renasc.':''}</small></div>`}o+='</div>';
  const sl=s=>{const it=h.eq[s];return`<div class="slot">${it?tile(it,'eqslot',s,aff(h,it)?'<i class="af"></i>':''):`<div class="it empty" data-a="eqslot" data-v="${s}"><img src="${slotIcon(s)}"></div>`}${SLN[s]}</div>`};
- o+=`<div class="fr g show"><div class="sh-top"><div class="slots">${sl('arma')}${sl('elmo')}</div><div class="stage"><canvas id="heroPrev" width="56" height="50"></canvas></div><div class="slots">${sl('armadura')}${sl('anel')}</div></div>
+ o+=`<div class="fr g show"><div class="sh-top"><div class="slots">${sl('arma')}${sl('elmo')}</div><div class="stage"><canvas id="heroPrev" width="224" height="200"></canvas></div><div class="slots">${sl('armadura')}${sl('anel')}</div></div>
  <div class="ribbon">${h.name.toUpperCase()}</div>
  <div class="clsline"><img src="${skillIcon(C.sk[0])}"> ${C.n}${h.sub?` › <span class="g">${SUB[h.sub].n}</span>`:''}<span class="lvb">NV ${h.lvl}</span></div>
  <div class="xpw"><i style="width:${h.xp/xpNeed(h.lvl)*100}%"></i><span>XP ${fmt(h.xp)} / ${fmt(xpNeed(h.lvl))}</span></div>
@@ -1439,19 +1456,19 @@ function tabForja(){const eqd=[];S.heroes.forEach(h=>SLOTS.forEach(sl=>{if(h.eq[
 const QT={kills:['Derrote {n} inimigos','skull','#e8e0d0',()=>ri(150,400)],bosses:['Derrote {n} chefes','crown','#ffd34a',()=>ri(2,5)],levels:['Suba {n} níveis de heróis','up','#5cd65c',()=>ri(3,8)],enh:['Aprimore itens {n} vezes','anvil','#8a94a4',()=>ri(2,5)],loot:['Encontre {n} itens','chest','#9a6232',()=>ri(4,10)],skills:['Aprenda {n} níveis de habilidade','book','#4a7aff',()=>ri(2,5)],goldT:['Ganhe {n} de ouro','coin','#e8b030',()=>Math.floor(goldKill(Math.max(10,Lv()))*ri(150,300))],dun:['Vença {n} masmorras','key','#e8b030',()=>ri(1,2)]};
 const qProg=q=>0;
 function missDot(){questRoll();passRoll();wheelRoll();const ql=S.dq.list.concat(S.wq.list).some(q=>!q.ok&&qP(q)>=q.n);const t=passTier();let pp=false;for(let i=1;i<=t;i++)if(!S.pass.got[i]||(S.pass.prem&&!S.pass.gotP[i])){pp=true;break}return loginState().can||ql||pp||S.wheel.n===0||ACH.some(a=>!S.ach[a[0]]&&a[3]())}
-function tabMiss(){questRoll();let o=`<div class="fr pnl"><h3>MISSÕES</h3>${missLogin()}${subtabs(missTab,'misstab',[['dia','Diárias','scroll','#e8d8b0'],['pass','Passe','crown','#ff4ad8'],['roda','Roleta','sun','#ffd34a'],['ev','Evento','star','#ffd34a'],['ach','Feitos','crown','#ffd34a']])}`;
- if(missTab==='dia')o+=missDaily();if(missTab==='pass')o+=missPass();if(missTab==='roda')o+=missWheel();if(missTab==='ev')o+=missEvent();if(missTab==='ach')o+=missAch();o+='</div>';
+function tabMiss(){questRoll();let o=`<div class="fr pnl"><h3>MISSÕES</h3>${missLogin()}${subtabs(missTab,'misstab',[['dia','Diárias','scroll','#e8d8b0'],['pass','Passe','crown','#ff4ad8'],['roda','Roleta','sun','#ffd34a'],['ev','Evento','star','#ffd34a'],['ach','Feitos','crown','#ffd34a'],['tit','Títulos','crown','#ff4ad8']])}`;
+ if(missTab==='dia')o+=missDaily();if(missTab==='pass')o+=missPass();if(missTab==='roda')o+=missWheel();if(missTab==='ev')o+=missEvent();if(missTab==='ach')o+=missAch();if(missTab==='tit')o+=missTit();o+='</div>';
  const s=S.st;o+=`<div class="fr pnl"><h3>CRÔNICAS</h3><div class="stats">${[['skull','#e8e0d0','Abates',fmt(s.kills)],['crown','#ffd34a','Chefes',fmt(s.bosses)],['map','#e8d8b0','Fase máx',S.maxStage],['rune','#a35cff','Renasc.',s.prest],['chest','#9a6232','Itens',fmt(s.loot)],['up','#4ab0ff','Torre',S.tw.max]].map(([g,c,n,v])=>`<div><img src="${icon(g,c)}"><span>${n}</span><b>${v}</b></div>`).join('')}</div></div>`;return o}
 /* preview */
 const PED=(()=>{const b=new PB(44,10),Q=ramp('#5a5868');b.ell(22,4,21,4.5,Q);b.r(2,5,40,4,Q[0]);for(let x=2;x<42;x++)if(!b.g(x,4))b.e(x,5);b.ell(22,4,16,3,ramp('#7a7888'));b.r(10,7,24,1,'#2a2834');return b.outline(OUT).toC()})();
-function drawPreview(){const c=$('#heroPrev');if(!c)return;const x=c.getContext('2d'),h=S.heroes[S.sel];if(!h)return;const F=heroF(h);x.imageSmoothingEnabled=false;x.clearRect(0,0,56,50);
+function drawPreview(){const c=$('#heroPrev');if(!c)return;const x=c.getContext('2d'),h=S.heroes[S.sel];if(!h)return;const F=heroF(h);x.setTransform(4,0,0,4,0,0);x.imageSmoothingEnabled=false;x.clearRect(0,0,56,50);
  const g=x.createRadialGradient(28,28,2,28,28,26);g.addColorStop(0,CLS[h.cls].col+'66');g.addColorStop(1,CLS[h.cls].col+'00');x.fillStyle=g;x.fillRect(0,0,56,50);
  for(let i=0;i<6;i++){const a=T*.6+i*TAU/6;x.fillStyle=CLS[h.cls].col;x.globalAlpha=.25;x.fillRect(Math.round(28+Math.cos(a)*22),Math.round(26+Math.sin(a)*14),1,1)}x.globalAlpha=1;
- x.drawImage(PED,6,38);const best=Math.max(...SLOTS.map(s=>h.eq[s]?h.eq[s].r:0));
+ drawHD(x,PED,6,38);const best=Math.max(...SLOTS.map(s=>h.eq[s]?h.eq[s].r:0));
  const cyc=T%5;let img=F.idle[((T*2.2)|0)%2];if(cyc>4.2){const p=(cyc-4.2)/.8;img=p<.3?F.atk[0]:p<.5?F.atk[1]:p<.8?F.atk[2]:F.idle[0]}else if(cyc>3.4&&cyc<4.1)img=F.cast[((T*8)|0)%2];
- x.drawImage(img,12,12);if(best>=3&&Math.random()<.3){B.parts.length;x.fillStyle=RCOL[best];x.fillRect(ri(14,42),ri(14,42),1,1)}}
+ drawHD(x,img,12,12,32,32);if(best>=3&&Math.random()<.3){B.parts.length;x.fillStyle=RCOL[best];x.fillRect(ri(14,42),ri(14,42),1,1)}}
 /* modals */
-function modal(h,lock){$('#mbox').innerHTML=h;$('#modal').classList.add('on');$('#modal').dataset.lock=lock?1:''}
+function modal(h,lock){if(typeof REVT!=="undefined")REVT=0;$("#mbox").innerHTML=h;$('#modal').classList.add('on');$('#modal').dataset.lock=lock?1:''}
 function closeM(){$('#modal').classList.remove('on')}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!$('#modal').dataset.lock)closeM()});
 function toast(h){const d=document.createElement('div');d.className='toast';d.innerHTML=h;const c=$('#toasts');c.appendChild(d);while(c.children.length>3)c.firstChild.remove();setTimeout(()=>d.remove(),2600)}
@@ -1476,10 +1493,10 @@ function itemModal(id){const f=findItem(id);if(!f)return closeM();const it=f.it,
  const rows=keys.map(k=>{const v=it.st[k]||0,cv=cur?(cur.st[k]||0):0;const mul=(k==='atk'||k==='hp'||k==='def');const a=v*(mul?em:1),b2=cv*(mul?cem:1),d=a-b2;
   return`<div><img src="${icon(...STI[k])}"><span>${STN[k]}</span><b>${v?stv(k,v,em):'—'}</b>${f.inv!==undefined&&h&&Math.abs(d)>1e-6?`<small class="cmp ${d>0?'up':'dn'}">${d>0?'▲':'▼'}${mul?fmt(Math.abs(d)):pct(Math.abs(d))}</small>`:''}</div>`}).join('');
  const affH=S.heroes.filter(x=>aff(x,it)).map(x=>x.name);
- let b='';if(f.inv!==undefined){b+=S.heroes.map((x,i)=>`<button class="btn" data-a="equip" data-v="${it.id}:${i}">Equipar: ${x.name}</button>`).join('');b+=`<button class="btn gld" data-a="sell" data-v="${it.id}"><img src="${icon('coin','#e8b030')}">Vender ${fmt(sellVal(it))}</button><button class="btn blu" data-a="salv" data-v="${it.id}"><img src="${icon('shard','#4ad0ff')}">Desmontar ${salvVal(it)}</button>${mktCanSell(it,f)?`<button class="btn gld" data-a="mksell" data-v="${it.id}">Anunciar no Mercado</button>`:''}`}
+ let b='';if(f.inv!==undefined){b+=S.heroes.map((x,i)=>x.lvl>=reqLv(it)?`<button class="btn" data-a="equip" data-v="${it.id}:${i}">Equipar: ${x.name}</button>`:`<button class="btn gry dis">${x.name}: precisa Nv ${reqLv(it)}</button>`).join('');b+=`<button class="btn gld" data-a="sell" data-v="${it.id}"><img src="${icon('coin','#e8b030')}">Vender ${fmt(sellVal(it))}</button><button class="btn blu" data-a="salv" data-v="${it.id}"><img src="${icon('shard','#4ad0ff')}">Desmontar ${salvVal(it)}</button>${mktCanSell(it,f)?`<button class="btn gld" data-a="mksell" data-v="${it.id}">Anunciar no Mercado</button>`:''}`}
  else b+=`<button class="btn red" data-a="unequip" data-v="${f.h}:${f.sl}">Desequipar</button>`;
  b+=`<button class="btn pur ${it.en>=15||S.gold<c.g||S.frag<c.f?'dis':''}" data-a="enh" data-v="${it.id}">Aprimorar ${it.en>=15?'(máx)':`${fmt(c.g)} · ${c.f}<img src="${icon('shard','#4ad0ff')}">`}</button><button class="btn gry" data-a="close">Fechar</button>`;
- modal(`<div class="row"><div class="it r${it.r}" style="width:72px;height:72px;margin:0;flex:0 0 72px"><img src="${itemIcon(it)}" style="width:52px;height:52px"></div><div class="sp"><h2 style="margin:0" class="c${it.r}">${it.n}${it.en?' +'+it.en:''}</h2><span class="c${it.r}">${RAR[it.r].n}</span> · ${T2.n} · Nv ${it.L}</div></div>
+ modal(`<div class="row"><div class="it r${it.r}" style="width:72px;height:72px;margin:0;flex:0 0 72px"><img src="${itemIcon(it)}" style="width:52px;height:52px"></div><div class="sp"><h2 style="margin:0" class="c${it.r}">${it.n}${it.en?' +'+it.en:''}</h2><span class="c${it.r}">${RAR[it.r].n}</span> · ${T2.n} · <b class="${f.h!=null&&eqF(S.heroes[f.h],it)<1?'rd':''}">Requer Nv ${reqLv(it)}</b>${f.h!=null&&eqF(S.heroes[f.h],it)<1?`<br><span class="rd" style="font-size:15px">Nível do herói baixo: item enfraquecido (${Math.round(eqF(S.heroes[f.h],it)*100)}% dos atributos, sem efeitos especiais)</span>`:''}</div></div>
  ${it.s==='arma'?`<div style="margin-top:6px;font-size:17px"><img src="${icon('star','#ffd34a')}" class="ti"> Afinidade: ${Object.keys(AFF).filter(k=>AFF[k].includes(it.t)).map(k=>CLS[k].n).join(', ')}${affH.length?` <span class="g">(+15% ATQ p/ ${affH.join(', ')})</span>`:''}</div>`:''}
  ${(it.tr||[]).length?`<div class="traits">${it.tr.map(x=>`<div><img src="${icon(TR[x.id].i,TR[x.id].c)}"><b>${TR[x.id].n}</b> ${TR[x.id].d(x.q)}</div>`).join('')}${it.r===6?`<div><img src="${icon('star','#ff4ad8')}"><b class="c6">Aura Ancestral</b> +10% ATQ, VIDA e DEF e brilho arco-íris</div>`:''}</div>`:''}
  <div class="stats" style="margin-top:8px">${rows}<div><img src="${icon('espada',4)}"><span>PODER</span><b>${fmt(itemPow(it))}</b></div></div>
@@ -1505,16 +1522,16 @@ const ACT={
  learn:v=>{const h=S.heroes[S.sel],s=SK[v];if(!canLearn(h,s))return;h.sp--;h.sk[v]=(h.sk[v]||0)+1;S.st.skills++;rebuildParty();skModal(v);renderPanel();save()},
  subpick:()=>{const h=S.heroes[S.sel];modal('<h2>Escolha a subclasse</h2>'+CLS[h.cls].subs.map(k=>{const s=SUB[k];return`<div class="ccard" data-a="setsub" data-v="${k}"><img src="${urlOf(heroFrames(Object.assign(heroLook(h),s.look)).idle[0])}"><div class="tx"><b>${s.n}</b><br>${s.desc}<br><span class="mut">Bônus: ${Object.keys(s.bn).map(b=>'+'+pct(s.bn[b])+' '+STN[b]).join(', ')}</span></div></div>`}).join('')+'<div class="btns"><button class="btn gry" data-a="close">Depois</button></div>')},
  setsub:v=>{const h=S.heroes[S.sel];h.sub=v;skTab='s';refreshHero();closeM();toast(`${h.name} agora é <b class="g">${SUB[v].n}</b>!`);save()},
- eqslot:v=>{const h=S.heroes[S.sel],it=h.eq[v];if(it)itemModal(it.id);else{const c=S.inv.filter(i=>i.s===v).sort((a,b)=>itemPow(b)-itemPow(a));if(!c.length)return toast('Nenhum item desse tipo na bolsa.');itemModal(c[0].id)}},
+ eqslot:v=>{const h=S.heroes[S.sel],it=h.eq[v];if(it)itemModal(it.id);else{const c=S.inv.filter(i=>i.s===v).sort((a,b)=>(reqLv(a)<=h.lvl?0:1)-(reqLv(b)<=h.lvl?0:1)||itemPow(b)-itemPow(a));if(!c.length)return toast('Nenhum item desse tipo na bolsa.');itemModal(c[0].id)}},
  item:v=>itemModal(v),
- equip:v=>{const[id,hi]=v.split(':').map(Number);const f=findItem(id);if(!f||f.inv===undefined)return;const h=S.heroes[hi],it=f.it;S.inv.splice(f.inv,1);if(h.eq[it.s])S.inv.push(h.eq[it.s]);h.eq[it.s]=it;closeM();refreshHero();SND.play('equip');save()},
+ equip:v=>{const[id,hi]=v.split(':').map(Number);const f=findItem(id);if(!f||f.inv===undefined)return;const h=S.heroes[hi],it=f.it;if(h.lvl<reqLv(it))return toast(`${h.name} precisa do nível ${reqLv(it)} para usar este item.`);S.inv.splice(f.inv,1);if(h.eq[it.s])S.inv.push(h.eq[it.s]);h.eq[it.s]=it;closeM();refreshHero();SND.play('equip');save()},
  unequip:v=>{const[hi,sl]=v.split(':');const h=S.heroes[+hi];if(h.eq[sl]){S.inv.push(h.eq[sl]);h.eq[sl]=null}closeM();refreshHero()},
  sell:v=>{const f=findItem(v);if(!f||f.inv===undefined)return;S.gold+=sellVal(f.it);S.inv.splice(f.inv,1);closeM();renderPanel()},
  salv:v=>{const f=findItem(v);if(!f||f.inv===undefined)return;S.frag+=salvVal(f.it);S.inv.splice(f.inv,1);closeM();renderPanel()},
  enh:v=>{const f=findItem(v);if(!f)return;const it=f.it,c=enhCost(it);if(it.en>=15)return toast('Máximo +15.');if(S.gold<c.g||S.frag<c.f)return toast('Recursos insuficientes.');S.gold-=c.g;S.frag-=c.f;S.st.enh++;const prot=S.useProt&&S.prot>0&&it.en>=10;if(prot)S.prot--;
   if(Math.random()<enhChance(it.en)){it.en++;S.st.maxEn=Math.max(S.st.maxEn||0,it.en);SND.play('forge');toast(`<img src="${itemIcon(it)}" class="ti"><span class="c${it.r}">${it.n}</span> agora é +${it.en}!`)}else{SND.play('defeat');if(it.en>=10&&!prot){it.en--;toast('A forja falhou! O item perdeu 1 nível.')}else toast(prot?'A forja falhou, mas a proteção salvou o item.':'A forja falhou! Materiais perdidos.')}
   rebuildParty();if($('#modal').classList.contains('on'))itemModal(it.id);renderPanel();save()},
- bestgear:()=>{const h=S.heroes[S.sel];let n=0;const sc=it=>itemPow(it)*(aff(h,it)?1.15:1);SLOTS.forEach(sl=>{const c=S.inv.filter(i=>i.s===sl).sort((a,b)=>sc(b)-sc(a))[0];if(c&&(!h.eq[sl]||sc(c)>sc(h.eq[sl]))){S.inv.splice(S.inv.indexOf(c),1);if(h.eq[sl])S.inv.push(h.eq[sl]);h.eq[sl]=c;n++}});refreshHero();toast(n?`${n} itens equipados.`:'Já está com o melhor equipamento.')},
+ bestgear:()=>{const h=S.heroes[S.sel];let n=0;const sc=it=>itemPow(it)*(aff(h,it)?1.15:1);SLOTS.forEach(sl=>{const c=S.inv.filter(i=>i.s===sl&&reqLv(i)<=h.lvl).sort((a,b)=>sc(b)-sc(a))[0];if(c&&(!h.eq[sl]||sc(c)>sc(h.eq[sl]))){S.inv.splice(S.inv.indexOf(c),1);if(h.eq[sl])S.inv.push(h.eq[sl]);h.eq[sl]=c;n++}});refreshHero();toast(n?`${n} itens equipados.`:'Já está com o melhor equipamento.')},
  resetsk:()=>{const h=S.heroes[S.sel];if(S.gems<10)return toast('Gemas insuficientes.');S.gems-=10;let t=0;for(const k in h.sk)t+=h.sk[k];h.sk={};h.sp+=t;refreshHero();toast('Pontos de habilidade devolvidos.')},
  sellall:()=>{let g=0;S.inv=S.inv.filter(i=>{if(i.r===0&&!i.en){g+=sellVal(i);return false}return true});S.gold+=g;toast(`+${fmt(g)} ouro`);renderPanel()},
  salvall:()=>{let f=0;S.inv=S.inv.filter(i=>{if(i.r<=1&&!i.en){f+=salvVal(i);return false}return true});S.frag+=f;toast(`+${f} fragmentos`);renderPanel()},
@@ -1603,7 +1620,7 @@ function metaBonus(){if(MB)return MB;const b={atk:0,hp:0,def:0,gold:0,xp:0,luck:
  for(const id in S.rn)if(RUNES[id])b[RUNES[id].k]+=RUNES[id].v*S.rn[id];
  if(S.pet&&S.pets[S.pet]&&PETS[S.pet]){const P=PETS[S.pet];b[P.k]+=petVal(S.pet);if(P.k2)b[P.k2]+=petVal(S.pet)*P.v2/P.v}
  const nt=Object.keys(S.troph).length;b.atk+=.01*nt;b.hp+=.01*nt;
- for(const id in S.best){const k=S.best[id];if(k>=50)b.gold+=.005;if(k>=500)b.atk+=.005}
+ titleBonus(b);for(const id in S.best){const k=S.best[id];if(k>=50)b.gold+=.005;if(k>=500)b.atk+=.005}
  return MB=b}
 const mbDirty=()=>{MB=null};
 function dayRoll(){const k=dayKey();if(!S.day||S.day.d!==k)S.day={d:k,drops:0}}
@@ -1623,8 +1640,8 @@ function hatchEgg(gold){if(gold){if((S.geggs||0)<1)return;S.geggs--}else{if(S.eg
  mbDirty();rebuildParty();if(PETS[id].leg){txt+='<br><b class="c4">PET LENDÁRIO!</b>';SND.play('legend')}reveal(gold?'Ovo Dourado':'Ovo de Pet',icon('egg',gold?'#ffd34a':'#f0e8d0'),[{r:PETS[id].leg?(gold?4:6):Math.min(5,S.pets[id].s+1),html:`<img src="${urlOf(petFrames(id)[0])}" style="width:64px;height:64px"><div>${txt}</div>`}]);save()}
 const petFeedCost=id=>Math.floor(goldKill(Math.max(10,S.maxStage*10))*25*S.pets[id].l);
 /* ---- reveal (abrir baú/ovo) ---- */
-function reveal(title,img,res){const mr=Math.max(0,...res.map(r=>r.r||0));modal(`<h2>${title}</h2><div class="opn"><img class="shk" src="${img}"></div>`);SND.play('forge');
- setTimeout(()=>{$('#mbox').innerHTML=`<h2>${title}</h2><div class="opn done">${res.map(r=>`<div class="rvl" style="--rc:${RCOL[r.r||0]}"><div class="rays"></div><div class="rvc">${r.html}</div></div>`).join('')}</div><div class="btns"><button class="btn gld" data-a="close">Pegar!</button></div>`;SND.play(mr>=4?'legend':'rare')},950)}
+let REVT=0;function reveal(title,img,res){const mr=Math.max(0,...res.map(r=>r.r||0));modal(`<h2>${title}</h2><div class="opn"><img class="shk" src="${img}"></div>`);const tok=REVT=Math.random();SND.play('forge');
+ setTimeout(()=>{if(REVT!==tok||!$('#modal').classList.contains('on'))return;$('#mbox').innerHTML=`<h2>${title}</h2><div class="opn done">${res.map(r=>`<div class="rvl" style="--rc:${RCOL[r.r||0]}"><div class="rays"></div><div class="rvc">${r.html}</div></div>`).join('')}</div><div class="btns"><button class="btn gld" data-a="close">Pegar!</button></div>`;SND.play(mr>=4?'legend':'rare')},950)}
 const revItem=it=>({r:it.r,html:`<div class="it r${it.r}" style="margin:0 auto">${`<img src="${itemIcon(it)}">`}</div><div class="c${it.r}">${it.n}</div>`});
 /* ---- desafios: masmorra, torre, chefe de guilda ---- */
 function chStart(c){if(S.ch)return false;S.ch=c;B.heroes.forEach(u=>{u.dead=false;u.hp=u.st.hp;u.act=null;u.buffs=[];u.shield=0});B.scroll+=60;spawnWave();renderPanel();return true}
@@ -1666,7 +1683,7 @@ function gbClaim(){const k=gbId();if(S.gbClaim===k||!(GB.hp&&GB.tot>=GB.hp))retu
  if(Math.random()<.25){const before=S.cos.length;giveCos(null,true);if(S.cos.length>before){const id=S.cos[S.cos.length-1];res.push({r:5,html:`<img src="${cosIcon(id)}" style="width:48px;height:48px"><div>${COS[id].n}</div>`})}}reveal('Recompensa da Guilda',icon('chest','#e8b030'),res);save()}
 const cosIcon=id=>{const c=COS[id];if(c.t==='skin')return skinIcon(id);return c.t==='capa'?icon('wing',c.c):icon('sun',c.c==='rainbow'?'#ff4ad8':c.c)};
 /* ---- pet na batalha ---- */
-function drawPet(){if(!S.pet||!S.pets[S.pet]||!B.heroes.length)return;const fr=petFrames(S.pet),bx=Math.min(...B.heroes.map(u=>u.x))-16,y=GY-24+Math.sin(T*3)*2;ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(q(bx+3),GY-1,10,1);ctx.drawImage(fr[((T*4)|0)%2],q(bx),q(y))}
+function drawPet(){if(!S.pet||!S.pets[S.pet]||!B.heroes.length)return;const fr=petFrames(S.pet),bx=Math.min(...B.heroes.map(u=>u.x))-16,y=GY-24+Math.sin(T*3)*2;ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(q(bx+3),GY-1,10,1);drawHD(ctx,fr[((T*4)|0)%2],q(bx),q(y),16,16)}
 /* ---- login, missões diárias/semanais, eventos ---- */
 const LOGINR=[['Ouro','coin','#e8b030',()=>{const g=goldKill(Math.max(10,Lv()))*300;S.gold+=g;return fmt(g)+' ouro'}],['Chave','key','#e8b030',()=>{S.keys++;return '1 chave'}],['Gemas','gem','#3a8aff',()=>{S.gems+=3;return '3 gemas'}],['Ovo','egg','#f0e8d0',()=>{S.eggs++;return '1 ovo de pet'}],
  ['Chaves','key','#e8b030',()=>{S.keys+=2;S.frag+=50;return '2 chaves + 50 fragmentos'}],['Gemas','gem','#3a8aff',()=>{S.gems+=7;return '7 gemas'}],['Baú Lendário','chest','#ff9a1a',()=>{S.gems+=15;const it=mkItem(pick(SLOTS),rollRar(6,4),Math.max(10,Lv()));addItem(it,true);if(Math.random()<.3)giveCos(null);S.st.login7=(S.st.login7||0)+1;return it.n+' + 20 gemas'}]];
@@ -1709,7 +1726,7 @@ function missDaily(){questRoll();const row=(q,i,kind)=>{const p=qP(q),done=p>=q.
 function missEvent(){questRoll();const ev=curEvent();if(!ev)return`<div style="font-size:18px">Nenhum evento agora. Os eventos acontecem de <b>sexta a domingo</b>, cada semana um diferente:</div>`+EVS.map(e=>`<div class="li"><div class="tx"><b>${e.n}</b><br><span class="mut">${e.d}</span></div></div>`).join('');
  return`<div class="evb"><b>${ev.n}</b><br>${ev.d} · ${EVO&&EVO.until>Date.now()?'até '+new Date(EVO.until).toLocaleString('pt-BR'):'até domingo'}</div>`+EVT.map(([k,t,n])=>{const p=Math.min(n,S.ev.p[k]||0),got=S.ev.got[k];return`<div class="li"><div class="tx"><b>${t}</b><div class="prog"><i style="width:${p/n*100}%"></i></div><span class="mut">${fmt(p)}/${fmt(n)} · 10 gemas</span></div><button class="btn sm ${got?'gry dis':p>=n?'gld':'gry dis'}" data-a="evclaim" data-v="${k}">${got?'Feito':'Pegar'}</button></div>`}).join('')+
  `<div class="li"><div class="tx"><b>Complete as 3 tarefas</b><br><span class="mut">Visual raro + 15 gemas</span></div><button class="btn sm ${S.ev.got.all?'gry dis':EVT.every(([k])=>S.ev.got[k])?'gld':'gry dis'}" data-a="evclaim" data-v="all">${S.ev.got.all?'Feito':'Pegar'}</button></div>`}
-function missAch(){return`<div class="row" style="font-size:18px;margin-bottom:6px">Título: <b class="g">${S.title||'—'}</b></div>`+ACH.map(([id,n,d,fn,gm,ti])=>{const ok=fn(),got=S.ach[id];return`<div class="li"><div class="ico"><img src="${icon('crown',got?'#ffd34a':ok?'#5cd65c':'#5a5a5a')}"></div><div class="tx"><b>${n}</b><br><span class="mut">${d} · ${gm} gemas · título “${ti}”</span></div>${got?`<button class="btn sm ${S.title===ti?'gld':'gry'}" data-a="title" data-v="${ti}">${S.title===ti?'Usando':'Usar título'}</button>`:`<button class="btn sm ${ok?'gld':'gry dis'}" data-a="achclaim" data-v="${id}">Pegar</button>`}</div>`}).join('')}
+function missAch(){return`<div class="row" style="font-size:18px;margin-bottom:6px">Título: ${S.title?titleHTML(S.title,false):'—'} <span class="mut" style="font-size:15px">(todos em Missões › Títulos)</span></div>`+ACH.map(([id,n,d,fn,gm,ti])=>{const ok=fn(),got=S.ach[id];return`<div class="li"><div class="ico"><img src="${icon('crown',got?'#ffd34a':ok?'#5cd65c':'#5a5a5a')}"></div><div class="tx"><b>${n}</b><br><span class="mut">${d} · ${gm} gemas · título “${ti}”</span></div>${got?`<button class="btn sm ${S.title==='a_'+id?'gld':'gry'}" data-a="title" data-v="a_${id}">${S.title==='a_'+id?'Usando':'Usar título'}</button>`:`<button class="btn sm ${ok?'gld':'gry dis'}" data-a="achclaim" data-v="${id}">Pegar</button>`}</div>`}).join('')}
 /* ---- ações ---- */
 Object.assign(ACT,{
  hatch:()=>hatchEgg(),petset:v=>{S.pet=v;mbDirty();rebuildParty();renderPanel()},
@@ -1717,7 +1734,7 @@ Object.assign(ACT,{
  petevo:v=>{const m=S.pets[v];if(m.sh<m.s*2||m.s>=5)return;m.sh-=m.s*2;m.s++;mbDirty();rebuildParty();SND.play('legend');toast(`${PETS[v].n} evoluiu para ${'★'.repeat(m.s)}!`);renderPanel()},
  coseq:v=>{const c=COS[v],h=S.heroes[S.sel];h.cos=h.cos||{};if(h.cos[c.t]===v){h.cos[c.t]=null}else{S.heroes.forEach(x=>{if(x.cos&&x.cos[c.t]===v)x.cos[c.t]=null});h.cos[c.t]=v}SND.play('equip');rebuildParty();renderPanel();save()},
  tower:()=>towerStart(),bestm:v=>{const d=MONS[v],k=S.best[v]||0;modal(`<div class="row"><img src="${urlOf(monFrames(d).idle[0])}" style="width:72px;height:72px;${k?'':'filter:brightness(0)'}"><div class="sp"><h2 style="margin:0">${k?d.n:'???'}</h2>Abates: <b class="g">${fmt(k)}</b></div></div><div style="margin-top:8px;font-size:18px">Troféu: ${S.troph[v]?`<b class="g">${trophName(d)}</b> ✔ (+1% ATQ e VIDA)`:'<span class="mut">ainda não encontrado (cai raramente deste monstro)</span>'}<br>50 abates: ${k>=50?'<span class="gr">✔ +0,5% ouro</span>':'+0,5% ouro'}<br>500 abates: ${k>=500?'<span class="gr">✔ +0,5% ATQ</span>':'+0,5% ATQ'}</div><div class="btns"><button class="btn gry" data-a="close">Fechar</button></div>`)},
- mitem:v=>{const it=S.merch.items[+v];if(!it)return;const p=merchPrice(it);modal(`<div class="row"><div class="it r${it.r}" style="margin:0;width:64px;height:64px"><img src="${itemIcon(it)}"></div><div class="sp"><h2 class="c${it.r}" style="margin:0">${it.n}</h2>${RAR[it.r].n} · ${ITY[it.s][it.t].n} · Nv ${it.L}</div></div>${(it.tr||[]).map(x=>`<div class="mut" style="font-size:16px">◆ ${TR[x.id].n}: ${TR[x.id].d(x.q)}</div>`).join('')}<div class="btns"><button class="btn ${p.gm?'blu':'gld'}" data-a="mbuy" data-v="${v}">Comprar por ${p.gm?p.gm+' gemas':fmt(p.g)+' ouro'}</button><button class="btn gry" data-a="close">Fechar</button></div>`)},
+ mitem:v=>{const it=S.merch.items[+v];if(!it)return;const p=merchPrice(it);modal(`<div class="row"><div class="it r${it.r}" style="margin:0;width:64px;height:64px"><img src="${itemIcon(it)}"></div><div class="sp"><h2 class="c${it.r}" style="margin:0">${it.n}</h2>${RAR[it.r].n} · ${ITY[it.s][it.t].n} · Requer Nv ${reqLv(it)}</div></div>${(it.tr||[]).map(x=>`<div class="mut" style="font-size:16px">◆ ${TR[x.id].n}: ${TR[x.id].d(x.q)}</div>`).join('')}<div class="btns"><button class="btn ${p.gm?'blu':'gld'}" data-a="mbuy" data-v="${v}">Comprar por ${p.gm?p.gm+' gemas':fmt(p.g)+' ouro'}</button><button class="btn gry" data-a="close">Fechar</button></div>`)},
  mbuy:v=>{const it=S.merch.items[+v];if(!it)return;const p=merchPrice(it);if(S.inv.length>=S.bag)return toast('Bolsa cheia!');if(p.gm?S.gems<p.gm:S.gold<p.g)return toast('Saldo insuficiente.');if(p.gm)S.gems-=p.gm;else S.gold-=p.g;S.inv.push(it);S.merch.items[+v]=null;SND.play('buy');closeM();renderPanel();save()},
  merchref:()=>{if(S.gems<10)return;S.gems-=10;merchRoll(true);renderPanel()},
  bagup:()=>{const c=bagCost();if(S.bag>=200)return toast('Bolsa no tamanho máximo.');if(S.gems<c)return toast(`Precisa de ${c} gemas.`);S.gems-=c;S.bag+=10;S.bagN++;SND.play('buy');toast(`Bolsa ampliada para ${S.bag}!`);renderPanel();save()},
@@ -1726,7 +1743,7 @@ Object.assign(ACT,{
  login:()=>loginModal(),loginclaim:()=>{const st=loginState();if(!st.can)return;const txt=LOGINR[st.day-1][3]();S.login={n:st.day,c:dayKey()};passAdd(50);closeM();reveal('Recompensa do dia '+st.day,icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2]),[{r:st.day===7?4:2,html:`<img src="${icon(LOGINR[st.day-1][1],LOGINR[st.day-1][2])}" style="width:48px;height:48px"><div>${txt}</div>`}]);save()},
  qclaim:v=>{const kind=v[0],i=+v.slice(1),q=(kind==='d'?S.dq:S.wq).list[i];if(!q||q.ok||qP(q)<q.n)return;q.ok=1;passAdd(kind==='d'?40:150);if(kind==='d'){S.gold+=q.gold;if(q.key)S.keys++;toast(`+${fmt(q.gold)} ouro${q.key?' e 1 chave':''}`)}else{S.gems+=q.gems;S.eggs+=q.egg;toast(`+${q.gems} gemas e 1 ovo`)}SND.play('coin');renderPanel();save()},
  evclaim:v=>{if(!S.ev||!S.ev.id||S.ev.got[v])return;if(v==='all'){if(!EVT.every(([k])=>S.ev.got[k]))return;S.ev.got.all=1;S.gems+=15;giveCos(null)}else{const t=EVT.find(x=>x[0]===v);if((S.ev.p[v]||0)<t[2])return;S.ev.got[v]=1;S.gems+=10;passAdd(30);toast('+10 gemas')}SND.play('victory');renderPanel();save()},
- achclaim:v=>{const a=ACH.find(x=>x[0]===v);if(!a||S.ach[v]||!a[3]())return;S.ach[v]=1;S.gems+=a[4];S.title=a[5];toast(`Conquista! +${a[4]} gemas · título “${a[5]}”`);SND.play('legend');syncProfile(true);renderPanel();save()},
+ achclaim:v=>{const a=ACH.find(x=>x[0]===v);if(!a||S.ach[v]||!a[3]())return;S.ach[v]=1;S.gems+=a[4];if(!S.tits)S.tits={};S.tits['a_'+v]=1;S.title='a_'+v;mbDirty();toast(`Conquista! +${a[4]} gemas · título “${a[5]}”`);SND.play('legend');syncProfile(true);renderPanel();save()},
  title:v=>{S.title=v;syncProfile(true);renderPanel();save()},
  gbattack:()=>gbStart(),gbclaim:()=>gbClaim(),
  prestige:()=>{const g=essGain();if(g<1)return toast('Renascer libera a partir do andar 200.');modal(`<h2>Renascer?</h2><div>Você ganhará <b class="g">+${g} Essência Rúnica</b> para evoluir runas específicas no Grimório.<br><span class="mut">Fase, ouro, melhorias, níveis, habilidades e subclasses voltam ao início.</span></div><div class="btns"><button class="btn pur" data-a="prestigeOk">Renascer!</button><button class="btn gry" data-a="close">Cancelar</button></div>`)},
@@ -1841,7 +1858,7 @@ function checkGrants(){const g=(NET.grants||[]).filter(grantDue).sort((a,b)=>a.t
  if(g.item!=null&&!g.it){const it=mkItem(pick(SLOTS),clamp(g.item|0,0,6),L);addItem(it,true);res.push(`<span class="c${it.r}">${it.n}</span>`)}
  if(g.it&&ITY[g.it.s]){const T=g.it,it=mkItem(T.s,clamp(T.r|0,0,6),L,ITY[T.s][T.t]?T.t:undefined);it.en=clamp(T.en|0,0,15);if(it.en)S.st.maxEn=Math.max(S.st.maxEn||0,it.en);addItem(it,true);res.push(`<img src="${itemIcon(it)}" class="ti"> <span class="c${it.r}">${it.n}${it.en?' +'+it.en:''}</span>`)}
  if(g.pet&&PETS[g.pet]){if(!S.pets[g.pet]){S.pets[g.pet]={s:1,l:1,sh:0};if(!S.pet)S.pet=g.pet}else S.pets[g.pet].sh+=2;mbDirty();rebuildParty();res.push(`Pet: ${PETS[g.pet].n}`)}
- if(g.cos&&COS[g.cos]){giveCos(g.cos,true);res.push(`Visual: ${COS[g.cos].n}`)}
+ if(g.cos&&COS[g.cos]){giveCos(g.cos,true);res.push(`Visual: ${COS[g.cos].n}`)}if(g.tit&&titDef(g.tit)){giveTitle(g.tit,true);res.push(`Título: ${titleHTML(g.tit,false)}`)}
  reveal('Presente do Game Master',icon('crown','#e2443c'),[{r:g.it?g.it.r:4,html:`<div style="font-size:18px">${g.msg?`“${esc(g.msg)}”<br><br>`:''}${res.join('<br>')||'Uma mensagem para você!'}</div>`}]);save();cloudSave(true);setTimeout(checkGrants,4000)}
 function applyOp(g){S.gclaim[g.id]=1;let txt='';
  if(g.op==='addlvl'){const n=clamp(g.val|0,1,300);S.heroes.forEach(h=>{const d=Math.min(300,h.lvl+n)-h.lvl;h.lvl+=d;h.sp+=d});txt=`Seus heróis ganharam ${n} níveis!`}
@@ -1874,7 +1891,7 @@ function gmHTML(){if(!NET.gm)return'<div class="mut">Acesso restrito.</div>';set
  <label>Raridade<select id="gmRar">${RAR.map((r,i)=>`<option value="${i}" ${i===4?'selected':''}>${r.n}</option>`).join('')}</select></label><label>Aprimoramento<select id="gmEn">${Array.from({length:16},(_,i)=>`<option value="${i}">+${i}</option>`).join('')}</select></label></div>
  <div class="mut" style="font-size:14px">O nível do item acompanha a fase do jogador. Lendários ou melhores vêm com efeitos especiais.</div></div>
  <div class="gmf"><label>Pet<select id="gmPet"><option value="">Nenhum</option>${Object.keys(PETS).map(k=>`<option value="${k}">${PETS[k].n}</option>`).join('')}</select></label><label>Visual<select id="gmCos"><option value="">Nenhum</option>${Object.keys(COS).map(k=>`<option value="${k}">${COS[k].n}</option>`).join('')}</select></label>
- <label style="grid-column:span 2">Mensagem<input id="gmMsg" maxlength="120"></label><label>Entregar daqui a (horas)<input id="gmAt" type="number" min="0" max="720" value="0"></label></div>
+ <label style="grid-column:span 2">Título<select id="gmTit"><option value="">Nenhum</option>${Object.keys(TIT).filter(k=>!TIT[k].ach).map(k=>`<option value="${k}">${TIT[k].n} (${TRAR[TIT[k].r].n})</option>`).join('')}</select></label><label style="grid-column:span 2">Mensagem<input id="gmMsg" maxlength="120"></label><label>Entregar daqui a (horas)<input id="gmAt" type="number" min="0" max="720" value="0"></label></div>
  <div class="btns"><button class="btn sm blu" data-a="gmgrant">Enviar presente</button></div>
  <h3 style="margin-top:8px">EVENTO</h3><div style="font-size:17px">${ev?`${evo.start>now?'Agendado':'Ativo'}: <b class="g">${esc(ev.n)}</b> ${evo.start>now?'começa '+new Date(evo.start).toLocaleString('pt-BR')+' ·':''} até ${new Date(evo.until).toLocaleString('pt-BR')}`:'Nenhum evento do GM (o automático roda de sexta a domingo).'}</div>
  <div class="gmf"><label style="grid-column:span 2">Evento<select id="gmEv">${EVS.map(e=>`<option value="${e.id}">${e.n} (${e.d})</option>`).join('')}<option value="custom">Personalizado...</option></select></label>
@@ -1899,8 +1916,8 @@ Object.assign(ACT,{
  gmann:async()=>{const t=($('#gmAnn').value||'').trim().slice(0,200);if(!t)return;const h=Math.max(0,+$('#gmAnnH').value||0);try{await NET.db.doc('config/announce').set({t,ts:Date.now(),at:Date.now()+h*36e5,by:NET.uid});logGM('publicou anúncio','',h?`em ${h}h`:'');toast(h?`Anúncio agendado para daqui a ${h}h.`:'Anúncio publicado!')}catch(e){gmFail()}},
  gmannclr:async()=>{try{await NET.db.doc('config/announce').delete();logGM('removeu o anúncio');toast('Anúncio removido.');renderPanel()}catch(e){gmFail()}},
  gmgrant:async()=>{const n=id=>Math.max(0,Math.min(1e5,parseInt($(id).value)||0));const g={to:$('#gmTo').value,gems:n('#gmGem'),keys:n('#gmKey'),eggs:n('#gmEgg'),geggs:Math.min(10,n('#gmGEgg')),gmin:n('#gmGold'),msg:($('#gmMsg').value||'').slice(0,120),ts:Date.now(),by:NET.uid};
-  const sl=$('#gmSlot').value;if(sl)g.it={s:sl,t:$('#gmType').value,r:+$('#gmRar').value,en:+$('#gmEn').value};if($('#gmPet').value)g.pet=$('#gmPet').value;if($('#gmCos').value)g.cos=$('#gmCos').value;const h=n('#gmAt');if(h)g.at=Date.now()+h*36e5;
-  if(!g.gems&&!g.keys&&!g.eggs&&!g.geggs&&!g.gmin&&!g.it&&!g.pet&&!g.cos&&!g.msg)return toast('Escolha algo para enviar.');try{await NET.db.collection('grants').add(g);const d=[g.gems&&g.gems+' gemas',g.keys&&g.keys+' chaves',g.eggs&&g.eggs+' ovos',g.geggs&&g.geggs+' ovos dourados',g.gmin&&g.gmin+' min ouro',g.it&&RAR[g.it.r].n+' '+ITY[g.it.s][g.it.t].n+(g.it.en?' +'+g.it.en:''),g.pet&&PETS[g.pet].n,g.cos&&COS[g.cos].n].filter(Boolean).join(', ');logGM('enviou presente para',pName(g.to),d);toast(h?`Presente agendado (${h}h).`:'Presente enviado!');SND.play('coin')}catch(e){gmFail()}},
+  const sl=$('#gmSlot').value;if(sl)g.it={s:sl,t:$('#gmType').value,r:+$('#gmRar').value,en:+$('#gmEn').value};if($('#gmPet').value)g.pet=$('#gmPet').value;if($('#gmCos').value)g.cos=$('#gmCos').value;if($('#gmTit').value)g.tit=$('#gmTit').value;const h=n('#gmAt');if(h)g.at=Date.now()+h*36e5;
+  if(!g.gems&&!g.keys&&!g.eggs&&!g.geggs&&!g.gmin&&!g.it&&!g.pet&&!g.cos&&!g.tit&&!g.msg)return toast('Escolha algo para enviar.');try{await NET.db.collection('grants').add(g);const d=[g.gems&&g.gems+' gemas',g.keys&&g.keys+' chaves',g.eggs&&g.eggs+' ovos',g.geggs&&g.geggs+' ovos dourados',g.gmin&&g.gmin+' min ouro',g.it&&RAR[g.it.r].n+' '+ITY[g.it.s][g.it.t].n+(g.it.en?' +'+g.it.en:''),g.pet&&PETS[g.pet].n,g.cos&&COS[g.cos].n,g.tit&&'título '+TIT[g.tit].n].filter(Boolean).join(', ');logGM('enviou presente para',pName(g.to),d);toast(h?`Presente agendado (${h}h).`:'Presente enviado!');SND.play('coin')}catch(e){gmFail()}},
  gmevent:async()=>{const id=$('#gmEv').value,h=Math.max(1,Math.min(336,+$('#gmEvH').value||24)),s=Math.max(0,+$('#gmEvS').value||0),st=Date.now()+s*36e5;const d={id,start:st,until:st+h*36e5,by:NET.uid};
   if(id==='custom'){d.n=($('#gmEvN').value||'Evento Especial').slice(0,30);d.xp=clamp(+$('#gmEvXp').value||1,1,10);d.gold=clamp(+$('#gmEvGold').value||1,1,10);d.luck=clamp((+$('#gmEvLuck').value||0)/100,0,3);d.boss=clamp(+$('#gmEvBoss').value||0,0,10);const p=[];if(d.xp>1)p.push(`XP x${d.xp}`);if(d.gold>1)p.push(`ouro x${d.gold}`);if(d.luck)p.push(`+${Math.round(d.luck*100)}% raridade`);if(d.boss)p.push(`chefes x${d.boss}`);d.d=p.join(', ')||'Evento especial'}
   try{await NET.db.doc('config/event').set(d);logGM(s?'agendou evento':'iniciou evento',d.n||EVS.find(e=>e.id===id).n,`${h}h${s?' em '+s+'h':''}`);toast(s?'Evento agendado!':'Evento iniciado para todos!');setTimeout(renderPanel,300)}catch(e){gmFail()}},
@@ -1941,7 +1958,7 @@ async function sendChat(ch){const inp=$('#chatIn');if(!inp||!NET.ok||sending)ret
   if(Math.random()<.25){const old=await NET.db.collection('chat').where('ts','<',Date.now()-2*864e5).limit(15).get();for(const d of old.docs){try{await NET.db.doc('chat/'+d.id).delete()}catch(e){}}}}catch(e){toast('Não foi possível enviar (sem permissão de escrita?).')}sending=false}
 function onChat(){const el=$('#chatList');if(el){const list=socTab==='guilda'?NET.gchat:NET.chat;el.innerHTML=chatHTML(list);el.scrollTop=el.scrollHeight;NET.unread=0}hudDirty=true}
 function chatHTML(list){if(!list.length)return'<div class="mut" style="text-align:center;padding:14px">Nenhuma mensagem ainda. Diga olá!</div>';
- return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${gmBadge(m.u)}${m.ti?` <small class="g">«${esc(m.ti)}»</small>`:''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.gm&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
+ return list.map(m=>{const me=m.u===NET.uid,col=(CLS[m.c]||CLS.warrior).col;const tm=new Date(m.ts||0);return`<div class="msg ${me?'me':''}"><b style="color:${col}" data-a="pcard" data-v="${esc(m.u)}">${esc(m.n)}</b>${gmBadge(m.u)}${m.ti?' '+titleHTML(m.ti):''} <small>Nv${m.lv|0} · ${String(tm.getHours()).padStart(2,'0')}:${String(tm.getMinutes()).padStart(2,'0')}</small>${NET.gm&&!me?` <i class="del" data-a="delmsg" data-v="${esc(m.id)}">✕</i>`:''}<div>${esc(m.t)}</div></div>`}).join('')}
 let socTab='chat',rankBy='ms';
 function chatErr(){return NET.err?`<div class="rd" style="font-size:15px">Erro do servidor: ${esc(NET.err).slice(0,200)}</div>`:''}
 function socialDirty(){const a=document.activeElement;if(tab==='social'&&socTab!=='gm'&&!(a&&(a.id==='chatIn'||/INPUT|SELECT|TEXTAREA/.test(a.tagName))))renderPanel();hudDirty=true}
@@ -1955,13 +1972,14 @@ function tabSocial(){if(socTab==='gm'&&!NET.gm)socTab='chat';
  if(socTab==='rank'){refreshPlayers();const key=rankBy;const list=NET.players.slice().sort((a,b)=>(b[key]||0)-(a[key]||0));const myPos=list.findIndex(p=>p.id===NET.uid)+1;
   o+=`<div class="tabs">${[['ms','Fase'],['pw','Poder'],['ar','Arena'],['tw','Torre'],['lv','Nível']].map(([k,n])=>`<button class="${rankBy===k?'on':''}" data-a="rankby" data-v="${k}">${n}</button>`).join('')}</div>`;
   const gl=NET.guilds.map(g=>guildInfo(g.id)).filter(Boolean);
-  o+=`<div class="mut" style="font-size:16px;margin-bottom:4px">${list.length} jogadores · sua posição: <b class="g">${myPos||'-'}</b></div>`+list.slice(0,50).map((p,i)=>{const gi=gl.find(g=>g.id===p.g);return`<div class="li rank ${p.id===NET.uid?'me':''}" data-a="pcard" data-v="${esc(p.id)}"><div class="pos p${i+1}">${i+1}</div><div class="ico"><img src="${urlOf(heroFrames(Object.assign(heroLook({id:(p.id||'').length*13,cls:p.c in CLS?p.c:'warrior',sub:SUB[p.sb]?p.sb:null,eq:{}}))).port)}"></div><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}${gi?` <span class="mut">[${esc(gi.tag)}]</span>`:''}${p.ti?` <small class="g">«${esc(p.ti)}»</small>`:''}<br><span class="mut">${CLS[p.c]?CLS[p.c].n:''} · Nv ${p.lv|0}</span></div><div class="rv g">${key==='pw'?fmt(p.pw):key==='ms'?'Fase '+(p.ms|0):key==='tw'?'Andar '+(p.tw|0):fmt(p[key]||0)}</div></div>`}).join('')+`<div class="btns"><button class="btn sm gry" data-a="refresh">Atualizar</button></div>`;
+  o+=`<div class="mut" style="font-size:16px;margin-bottom:4px">${list.length} jogadores · sua posição: <b class="g">${myPos||'-'}</b></div>`+list.slice(0,50).map((p,i)=>{const gi=gl.find(g=>g.id===p.g);return`<div class="li rank ${p.id===NET.uid?'me':''}" data-a="pcard" data-v="${esc(p.id)}"><div class="pos p${i+1}">${i+1}</div><div class="ico"><img src="${urlOf(heroFrames(Object.assign(heroLook({id:(p.id||'').length*13,cls:p.c in CLS?p.c:'warrior',sub:SUB[p.sb]?p.sb:null,eq:{}}))).port)}"></div><div class="tx"><b>${esc(p.n)}</b>${gmBadge(p.id)}${gi?` <span class="mut">[${esc(gi.tag)}]</span>`:''}${p.ti?' '+titleHTML(p.ti):''}<br><span class="mut">${CLS[p.c]?CLS[p.c].n:''} · Nv ${p.lv|0}</span></div><div class="rv g">${key==='pw'?fmt(p.pw):key==='ms'?'Fase '+(p.ms|0):key==='tw'?'Andar '+(p.tw|0):fmt(p[key]||0)}</div></div>`}).join('')+`<div class="btns"><button class="btn sm gry" data-a="refresh">Atualizar</button></div>`;
   if(gl.length)o+=`<h3 style="margin-top:8px">GUILDAS</h3>`+gl.sort((a,b)=>b.lv-a.lv||b.pw-a.pw).slice(0,10).map((g,i)=>`<div class="li"><div class="pos p${i+1}">${i+1}</div><div class="tx"><b>${esc(g.name)}</b> <span class="mut">[${esc(g.tag)}]</span><br><span class="mut">${g.mem.length} membros · Nv ${g.lv}</span></div><div class="rv g">${fmt(g.pw)}</div></div>`).join('')}
  if(socTab==='guilda'){refreshPlayers();const g=guildInfo(S.guild);
   if(!g){o+=`<div style="font-size:18px;margin-bottom:6px">Entre numa guilda para conversar com o grupo e ganhar <b class="g">+1% de ouro e XP por nível</b> da guilda (até Nv 30).</div><div class="btns"><button class="btn gld" data-a="gcreate">Criar guilda (20K ouro)</button></div><h3 style="margin-top:8px">GUILDAS ABERTAS</h3>`;
    const gl=NET.guilds.map(x=>guildInfo(x.id)).filter(Boolean);o+=gl.length?gl.map(x=>`<div class="li"><div class="ico"><img src="${icon('shield','#3a6ad8')}"></div><div class="tx"><b>${esc(x.name)}</b> <span class="mut">[${esc(x.tag)}]</span><br><span class="mut">${x.mem.length}/20 membros · Nv ${x.lv}</span></div><button class="btn sm blu ${x.mem.length>=20?'dis':''}" data-a="gjoin" data-v="${esc(x.id)}">Entrar</button></div>`).join(''):'<div class="mut">Nenhuma guilda ainda. Crie a primeira!</div>'}
   else{const next=Math.ceil(10**((g.lv+1)/2)-1);o+=`<div class="row"><div class="ico" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:radial-gradient(#2a4a8a,#0e0b10 70%);border:2px solid #000"><img src="${icon('shield','#3a6ad8')}" style="width:36px;height:36px"></div><div class="sp"><b class="g" style="font-size:22px">${esc(g.name)}</b> <span class="mut">[${esc(g.tag)}]</span><br>Nível <b class="g">${g.lv}</b> · ${g.mem.length}/20 membros · bônus +${g.lv}% ouro/XP</div></div>
    <div class="prog" style="margin:6px 0"><i style="width:${Math.min(100,g.tot/next*100)}%"></i></div><div class="mut" style="font-size:15px">Contribuição total ${fmt(g.tot)} / ${fmt(next)} · sua: ${fmt(S.gcon||0)}</div>
+   <div class="tavw"><canvas id="tav" width="416" height="224"></canvas><div class="mut" style="font-size:14px;text-align:center">Taberna da guilda · toque num membro para ver o perfil</div></div>${(setTimeout(tavStart,30),'')}
    <div class="btns">${[1e3,1e4,1e5,1e6].map(v=>`<button class="btn sm gld ${S.gold<v?'dis':''}" data-a="gdonate" data-v="${v}">Doar ${fmt(v)}</button>`).join('')}</div>
    <h3 style="margin-top:8px">CHEFE DA GUILDA</h3>${gbHTML()}
    <h3 style="margin-top:8px">MEMBROS</h3>${g.mem.sort((a,b)=>(b.gc||0)-(a.gc||0)).map(p=>`<div class="li" data-a="pcard" data-v="${esc(p.id)}"><div class="tx"><b>${esc(p.n)}</b>${p.id===g.leaderId?' <span class="g">★ Líder</span>':''}<br><span class="mut">Fase ${p.ms|0} · Poder ${fmt(p.pw)}</span></div><div class="rv">${fmt(p.gc||0)}</div></div>`).join('')}
@@ -1975,7 +1993,7 @@ function tabSocial(){if(socTab==='gm'&&!NET.gm)socTab='chat';
 const pendingReq=()=>NET.inReq.filter(p=>!S.friends.includes(p.id));
 function playerCard(id){setTimeout(async()=>{if(!NET.gm)return;const el=$('#banst');if(!el)return;try{const d=await NET.db.doc('bans/'+id).get();const b=d.exists?banState(d.data()):null;el.innerHTML=b?`<span class="rd">${b.type==='ban'?'Banido':'Silenciado'} ${b.until-Date.now()>3e11?'para sempre':'até '+new Date(b.until).toLocaleString('pt-BR')}</span>${b.r?' · '+esc(b.r):''}`:'Sem punições.'}catch(e){el.textContent=''}},50);const p=NET.players.find(x=>x.id===id)||NET.inReq.find(x=>x.id===id);if(!p){refreshPlayers(true);return toast('Carregando jogador...')}
  const g=guildInfo(p.g),isF=S.friends.includes(id),me=id===NET.uid,cls=CLS[p.c]?p.c:'warrior';
- modal(`<div class="row"><img src="${urlOf(heroFrames(heroLook({id:id.length*13,cls,sub:SUB[p.sb]?p.sb:null,eq:{}})).idle[0])}" style="width:72px;height:72px"><div class="sp"><h2 style="margin:0">${esc(p.n)}</h2>${CLS[cls].n}${SUB[p.sb]?' › '+SUB[p.sb].n:''} · Nv ${p.lv|0}${g?`<br>Guilda: <span class="g">${esc(g.name)}</span>`:''}</div></div>
+ modal(`<div class="row"><img src="${urlOf(heroFrames(p.tm&&p.tm[0]&&p.tm[0].L?p.tm[0].L:heroLook({id:id.length*13,cls,sub:SUB[p.sb]?p.sb:null,eq:{}})).idle[0])}" style="width:72px;height:72px"><div class="sp"><h2 style="margin:0">${esc(p.n)}</h2>${p.ti?titleHTML(p.ti,false)+'<br>':''}${CLS[cls].n}${SUB[p.sb]?' › '+SUB[p.sb].n:''} · Nv ${p.lv|0}${g?`<br>Guilda: <span class="g">${esc(g.name)}</span>`:''}</div></div>
  <div class="stats" style="margin-top:8px"><div><img src="${icon('map','#e8d8b0')}"><span>Fase máx</span><b>${p.ms|0}</b></div><div><img src="${icon('espada',4)}"><span>Poder</span><b>${fmt(p.pw||0)}</b></div><div><img src="${icon('up','#4ab0ff')}"><span>Torre</span><b>${p.tw|0}</b></div><div><img src="${icon('swords','#cfd6e0')}"><span>Heróis</span><b>${(p.hs||[]).length}</b></div></div>
  ${NET.gm&&!me?gmCardHTML(id):''}
  <div class="btns">${me?'':isF?`<button class="btn red" data-a="frem" data-v="${esc(id)}">Remover amigo</button>`:`<button class="btn" data-a="fadd" data-v="${esc(id)}">Adicionar amigo</button>`}<button class="btn gry" data-a="close">Fechar</button></div>`)}
@@ -2081,7 +2099,7 @@ async function mktLoad(force){if(!NET.ok||MKT.busy)return;if(MKT.uid!==NET.uid){
 async function mktSales(){if(!NET.ok||!NET.uid)return;try{const q=await NET.db.collection('sales').where('to','==',NET.uid).get();let tot=0;const names=[];for(const d of q.docs){const x=d.data();try{await d.ref?d.ref.delete():NET.db.doc('sales/'+d.id).delete()}catch(e){continue}tot+=x.g||0;names.push(x.n)}
  if(tot){S.gems+=tot;save();cloudSave(true);toast(`Mercado: você vendeu ${names.length} item(ns) e recebeu <b>${tot} gemas</b>!`);SND.play('coin')}}catch(e){}}
 setInterval(()=>{if(NET.ok)mktSales()},6e4);
-function mktRow(x,mine){const it=x.it,exp=x.ts<Date.now()-MKDAYS*864e5;return`<div class="li"><div class="ico r${it.r}" data-a="mkinfo" data-v="${esc(x.id)}"><img src="${itemIcon(it)}"></div><div class="tx"><b class="c${it.r}">${esc(it.n)}${it.en?' +'+it.en:''}</b><br><span class="mut">${RAR[it.r].n} · ${SLN[it.s]} · Nv ${it.L} · Poder ${fmt(itemPow(it))}${mine?'':` · ${esc(x.sn||'?')}`}</span></div>${mine?`<button class="btn sm ${exp?'gld':'gry'}" data-a="mkcancel" data-v="${esc(x.id)}">${exp?'Recolher':'Cancelar'}</button>`:`<button class="btn sm blu ${S.gems<x.p?'dis':''}" data-a="mkbuy" data-v="${esc(x.id)}"><img src="${icon('gem','#3a8aff')}">${x.p}</button>`}</div>`}
+function mktRow(x,mine){const it=x.it,exp=x.ts<Date.now()-MKDAYS*864e5;return`<div class="li"><div class="ico r${it.r}" data-a="mkinfo" data-v="${esc(x.id)}"><img src="${itemIcon(it)}"></div><div class="tx"><b class="c${it.r}">${esc(it.n)}${it.en?' +'+it.en:''}</b><br><span class="mut">${RAR[it.r].n} · ${SLN[it.s]} · Requer Nv ${reqLv(it)} · Poder ${fmt(itemPow(it))}${mine?'':` · ${esc(x.sn||'?')}`}</span></div>${mine?`<button class="btn sm ${exp?'gld':'gry'}" data-a="mkcancel" data-v="${esc(x.id)}">${exp?'Recolher':'Cancelar'}</button>`:`<button class="btn sm blu ${S.gems<x.p?'dis':''}" data-a="mkbuy" data-v="${esc(x.id)}"><img src="${icon('gem','#3a8aff')}">${x.p}</button>`}</div>`}
 function mktHTML(){if(NET.ok&&MKT.uid!==NET.uid){MKT.list=[];MKT.mine=[]}if(!NET.ok)return'<div class="mut" style="font-size:18px">O Mercado precisa da conta online. Entre na sua conta em Configurações.</div>';if(hardBan())return'<div class="rd">Conta suspensa.</div>';setTimeout(()=>mktLoad(),30);
  let o=`<div class="mut" style="font-size:16px;margin-bottom:6px">Compre e venda itens Raros ou melhores com outros jogadores, em gemas. O vendedor recebe o valor menos ${MKTAX*100}% de taxa. Anúncios duram ${MKDAYS} dias. Para vender, toque num item da Bolsa e escolha “Anunciar no Mercado”.</div>`;
  if(MKT.err)o+=`<div class="rd" style="font-size:15px">Mercado indisponível: ${esc(MKT.err)}</div>`;
@@ -2112,7 +2130,102 @@ Object.assign(ACT,{
   try{if(NET.db.runTransaction){await NET.db.runTransaction(async tx=>{const d=await tx.get(ref);if(!d.exists)throw new Error('gone');L=d.data();tx.delete(ref)})}else{const d=await ref.get();if(!d.exists)throw new Error('gone');L=d.data();await ref.delete()}}catch(e){toast('Alguém comprou antes de você!');return mktLoad(true)}
   S.gems-=L.p;const it=Object.assign({},L.it,{id:uid()});S.inv.push(it);S.st.loot++;try{await NET.db.collection('sales').add({to:L.s,g:Math.floor(L.p*(1-MKTAX)),n:it.n,by:S.nick,ts:Date.now()})}catch(e){}
   save();cloudSave(true);SND.play('legend');reveal('Compra no Mercado',icon('coin','#ffd34a'),[{r:it.r,html:`<img src="${itemIcon(it)}" style="width:48px;height:48px"><div class="c${it.r}">${esc(it.n)}${it.en?' +'+it.en:''}</div>`}]);mktLoad(true)},
- mkinfo:v=>{const x=MKT.list.concat(MKT.mine).find(m=>m.id===v);if(!x)return;const it=x.it;modal(`<h2 class="c${it.r}">${esc(it.n)}${it.en?' +'+it.en:''}</h2><div style="font-size:17px">${RAR[it.r].n} · ${ITY[it.s][it.t].n} · Nível ${it.L}<br>${Object.keys(it.st).map(k=>`${STN[k]||k}: <b>${['crit','aspd','cdmg','ls','dodge','heal'].includes(k)?pct(it.st[k]):fmt(it.st[k]*(['atk','hp','def'].includes(k)?1+.15*it.en:1))}</b>`).join('<br>')}${(it.tr||[]).map(t=>TR[t.id]?`<br><b class="c4">${TR[t.id].n}</b>`:'').join('')}</div><div class="btns"><button class="btn gry" data-a="close">Fechar</button></div>`)}});
+ mkinfo:v=>{const x=MKT.list.concat(MKT.mine).find(m=>m.id===v);if(!x)return;const it=x.it;modal(`<h2 class="c${it.r}">${esc(it.n)}${it.en?' +'+it.en:''}</h2><div style="font-size:17px">${RAR[it.r].n} · ${ITY[it.s][it.t].n} · Requer Nv ${reqLv(it)}<br>${Object.keys(it.st).map(k=>`${STN[k]||k}: <b>${['crit','aspd','cdmg','ls','dodge','heal'].includes(k)?pct(it.st[k]):fmt(it.st[k]*(['atk','hp','def'].includes(k)?1+.15*it.en:1))}</b>`).join('<br>')}${(it.tr||[]).map(t=>TR[t.id]?`<br><b class="c4">${TR[t.id].n}</b>`:'').join('')}</div><div class="btns"><button class="btn gry" data-a="close">Fechar</button></div>`)}});
+
+/* ================= TÍTULOS (comuns, raros, épicos, lendários e limitados) ================= */
+const TRAR={C:{n:'Comum',c:'#e8e0d0'},R:{n:'Raro',c:'#4ab0ff'},E:{n:'Épico',c:'#c27aff'},L:{n:'Lendário',c:'#ffb020'},X:{n:'Limitado',c:'rainbow'}};
+const TBN={atk:'ATQ',hp:'VIDA',def:'DEF',gold:'ouro',xp:'XP',luck:'sorte',cdmg:'dano crítico',all:'ATQ, VIDA e DEF',heal:'cura',forge:'chance na forja',aspd:'vel. de ataque'};
+const petLegN=()=>Object.keys(S.pets||{}).filter(k=>PETS[k]&&PETS[k].leg).length;
+const TIT={
+ dragoes:{n:'Matador de Dragões',r:'L',d:'Derrote o Senhor dos Dragões (Pico dos Dragões)',k:'atk',v:.05,ok:()=>(S.best.senhorD||0)>0},
+ titas:{n:'Quebra-Titãs',r:'L',d:'Derrote o Titã Esquelético 10 vezes',k:'hp',v:.06,ok:()=>(S.best.titaO||0)>=10},
+ arena:{n:'Lenda da Arena',r:'L',d:'Chegue à liga Lenda (1850 pontos)',k:'all',v:.04,ok:()=>S.ar&&S.ar.best>=1850},
+ ferreiro:{n:'Ferreiro Divino',r:'L',d:'Aprimore um item até +15',k:'forge',v:.08,ok:()=>(S.st.maxEn||0)>=15},
+ ancestral:{n:'Guardião Ancestral',r:'L',d:'Encontre 3 itens Antiguidade',k:'luck',v:.1,ok:()=>(S.st.anc||0)>=3},
+ domador:{n:'Domador de Lendas',r:'L',d:'Tenha os 5 pets lendários',k:'xp',v:.08,ok:()=>petLegN()>=5},
+ torre:{n:'Senhor da Torre',r:'L',d:'Chegue ao andar 150 da Torre',k:'hp',v:.05,ok:()=>(S.tw.max||0)>=150},
+ imortal:{n:'O Imortal',r:'L',d:'Renasça 5 vezes',k:'gold',v:.1,ok:()=>(S.st.prest||0)>=5},
+ cronista:{n:'Cronista do Reino',r:'L',d:'Complete o bestiário de todas as regiões',k:'cdmg',v:.15,ok:()=>Object.keys(S.regDone||{}).length>=BIO.length},
+ pioneiro:{n:'Pioneiro de Runa',r:'X',from:'2026-11-01',until:'2027-01-31',d:'Jogue durante o lançamento (até 31/01/2027)',k:'xp',v:.03,ok:()=>true},
+ natal26:{n:'Espírito do Natal',r:'X',from:'2026-12-20',until:'2027-01-06',d:'Entre no jogo entre 20/12/2026 e 06/01/2027',k:'gold',v:.04,ok:()=>true},
+ inverno:{n:'Gladiador do Inverno',r:'X',from:'2026-11-01',until:'2027-02-28',d:'Chegue à liga Platina na Arena até 28/02/2027',k:'atk',v:.04,ok:()=>S.ar&&S.ar.best>=1400},
+ cacador:{n:'Caçador da Lua Cheia',r:'X',from:'2026-11-01',until:'2027-01-31',d:'Derrote 5.000 monstros até 31/01/2027',k:'luck',v:.06,ok:()=>(S.st.kills||0)>=5000},
+ escolhido:{n:'Escolhido do Rei',r:'X',gm:1,d:'Só pode ser dado pelo Game Master',k:'all',v:.05},
+ fundador:{n:'Fundador',r:'X',gm:1,d:'Para quem apoiou o reino desde o começo (dado pelo GM)',k:'gold',v:.05}};
+ACH.forEach(([id,n,d,fn,gm,ti])=>{TIT['a_'+id]={n:ti,r:gm>=50?'E':gm>=20?'R':'C',d:'Conquista: '+n,ach:id}});
+const seasonTit=()=>'camp_'+seasonId();
+function titDef(id){if(!id)return null;if(TIT[id])return TIT[id];if(/^camp_/.test(id))return{n:'Campeão da Temporada '+id.slice(5),r:'X',d:'Nível 30 do Passe Premium na temporada '+id.slice(5),k:'atk',v:.03,season:1};const a=Object.keys(TIT).find(k=>TIT[k].n===id);return a?TIT[a]:null}
+const titAvail=t=>{const now=new Date().toISOString().slice(0,10);return(!t.from||now>=t.from)&&(!t.until||now<=t.until)};
+function titleHTML(id,small){const t=titDef(id);if(!t)return id?`<small class="g">«${esc(id)}»</small>`:'';const r=TRAR[t.r];return`<${small===false?'span':'small'} class="tit tit${t.r}" ${t.r!=='X'?`style="color:${r.c}"`:''}>«${esc(t.n)}»</${small===false?'span':'small'}>`}
+function titleBonus(b){const t=titDef(S.title);if(!t||!t.k||!S.tits||!S.tits[titKey(S.title)])return;if(t.k==='all'){b.atk+=t.v;b.hp+=t.v;b.def+=t.v}else if(b[t.k]!=null)b[t.k]+=t.v}
+const titKey=id=>TIT[id]||/^camp_/.test(id)?id:(Object.keys(TIT).find(k=>TIT[k].n===id)||id);
+function giveTitle(id,silent){if(!S.tits)S.tits={};if(S.tits[id])return;S.tits[id]=1;const t=titDef(id);mbDirty();if(silent||!t)return;if(LOGIN_OPEN||$('#modal').classList.contains('on')){toast(`Novo título: ${titleHTML(id)}`);return}
+ if(t.r==='L'||t.r==='X'){SND.play('legend');reveal(t.r==='X'?'Título LIMITADO!':'Título Lendário!',icon('crown',t.r==='X'?'#ff4ad8':'#ffb020'),[{r:t.r==='X'?6:4,html:`<div style="font-size:20px">${titleHTML(id,false)}</div><div class="mut" style="font-size:16px">${t.k?`+${Math.round(t.v*100)}% ${TBN[t.k]} quando estiver usando`:''}</div>`}])}else toast(`Novo título: ${titleHTML(id)}`)}
+function checkTitles(){if(!S.heroes||!S.heroes.length||LOGIN_OPEN||(!NET.uid&&!S.offline&&FIREBASE_CONFIG&&!window.claude))return;if(!S.tits)S.tits={};
+ if(S.title&&!TIT[S.title]&&!/^camp_/.test(S.title)){const k=titKey(S.title);if(TIT[k])S.title=k}
+ for(const a in S.ach||{})if(S.ach[a]&&TIT['a_'+a]&&!S.tits['a_'+a])S.tits['a_'+a]=1;
+ for(const id in TIT){const t=TIT[id];if(S.tits[id]||t.gm||t.ach)continue;if(!titAvail(t))continue;try{if(t.ok())giveTitle(id)}catch(e){}}
+ if(S.pass&&S.pass.prem&&S.pass.s===seasonId()&&S.pass.xp>=PTIER*30)giveTitle(seasonTit())}
+setInterval(()=>{if(!LOGIN_OPEN&&!$('#modal').classList.contains('on'))checkTitles()},5000);
+const TORD={X:0,L:1,E:2,R:3,C:4};
+function missTit(){const t=titDef(S.title);let o=`<div class="evb">Título atual: ${S.title?titleHTML(S.title,false):'<b>nenhum</b>'}${t&&t.k?`<br><span class="g">+${Math.round(t.v*100)}% ${TBN[t.k]}</span>`:''}<br><span class="mut" style="font-size:15px">Títulos <b style="color:${TRAR.L.c}">Lendários</b> e <b class="c6">Limitados</b> dão bônus. Limitados só podem ser conquistados no período indicado e nunca mais voltam.</span></div>`;
+ const ids=Object.keys(TIT).concat(Object.keys(S.tits||{}).filter(k=>/^camp_/.test(k)));if(!ids.includes(seasonTit()))ids.push(seasonTit());
+ const own=k=>S.tits&&S.tits[k];ids.sort((a,b)=>(own(b)?1:0)-(own(a)?1:0)||TORD[titDef(a).r]-TORD[titDef(b).r]);
+ o+=ids.map(id=>{const t=titDef(id),got=own(id),r=TRAR[t.r],av=t.gm?false:titAvail(t);if(!got&&t.r==='X'&&!t.gm&&!t.season&&!av&&t.until&&new Date().toISOString().slice(0,10)>t.until)return'';
+  const per=t.r==='X'?(t.gm?'Somente GM':t.season?'Só nesta temporada':`Até ${t.until.split('-').reverse().join('/')}`):'';
+  return`<div class="li ${S.title===id?'me':''}"><div class="ico"><img src="${icon('crown',got?(t.r==='X'?'#ff4ad8':r.c):'#4a4a4a')}"></div><div class="tx">${got?titleHTML(id,false):`<b class="mut">«${esc(t.n)}»</b>`} <span class="pill ${t.r==='X'?'c6':''}" style="font-size:12px;${t.r==='X'?'':'color:'+r.c}">${r.n.toUpperCase()}</span><br><span class="mut" style="font-size:15px">${t.d}${t.k?` · <span class="g">+${Math.round(t.v*100)}% ${TBN[t.k]}</span>`:''}${per?` · <b class="${av?'g':'rd'}">${per}</b>`:''}</span></div>${got?`<button class="btn sm ${S.title===id?'gld':'gry'}" data-a="title" data-v="${esc(id)}">${S.title===id?'Usando':'Usar'}</button>`:''}</div>`}).join('');return o}
+ACT.title=v=>{S.title=S.title===v?'':v;mbDirty();syncProfile(true);renderPanel();save()};
+
+/* ================= TABERNA DA GUILDA ================= */
+const TAV={run:false,m:{},bg:null,bart:null,hit:[]};const TW=208,TH=112;
+function tavBg(){if(TAV.bg)return TAV.bg;const c=cnv(TW,TH),x=c.getContext('2d'),F=(col,a,b,w,h)=>{x.fillStyle=col;x.fillRect(a,b,w,h)},rs=srand(4711);
+ for(let i=0;i<TW;i+=8){F(i%16?'#5a3a22':'#4e321e',i,0,8,78);F('#3a2414',i,0,1,78);for(let k=0;k<4;k++)F('#46301c',i+2+((rs()*4)|0),(rs()*74)|0,1,3)}
+ F('#2a1a10',0,0,TW,5);F('#3a2414',0,5,TW,1);F('#2a1a10',0,44,TW,3);for(const px of[0,52,104,156,207])F('#2a1a10',px,0,4,78);
+ F('#120c1e',18,12,28,28);F('#1e2c5a',20,14,24,24);for(let n=0;n<10;n++)F('#e8e8ff',20+((rs()*24)|0),14+((rs()*24)|0),1,1);x.fillStyle='#f4f0d8';x.beginPath();x.arc(37,21,4,0,TAU);x.fill();F('#1e2c5a',38,19,3,4);F('#3a2414',31,14,2,24);F('#3a2414',20,25,24,2);F('#2a1a10',16,38,32,3);
+ F('#6a6a72',146,22,48,56);for(let yy=22;yy<78;yy+=6)for(let xx=146+((yy/6)%2?0:4);xx<194;xx+=8){F('#5a5a62',xx,yy,7,5);F('#7a7a84',xx,yy,7,1)}F('#3a2a22',142,40,56,4);F('#4a3a2e',142,40,56,1);F('#140a08',156,50,28,28);F('#2a1810',158,52,24,26);
+F('#3a2414',58,22,76,2);F('#3a2414',58,36,76,2);const bc=['#3a8a4a','#8a2a2a','#2a5a9a','#9a7a2a','#6a2a8a','#2a8a8a'];
+ for(let i=0;i<11;i++){const bx=62+i*6+((rs()*2)|0),h=6+((rs()*4)|0),c2=bc[i%6];F(c2,bx,22-h,3,h);F('#e8e8e8',bx+1,21-h,1,1);F('#ffffff55',bx,22-h+1,1,h-2)}for(let i=0;i<9;i++){const bx=64+i*7;F('#8a6a3a',bx,31,5,5);F('#a8884a',bx,31,5,1);F('#5a3a1a',bx+4,32,2,2)}
+ F('#7a4a26',54,60,86,4);F('#9a6232',54,60,86,1);F('#5a361a',56,64,82,16);for(let i=56;i<138;i+=10)F('#4a2c14',i,64,1,16);F('#3a2210',54,79,86,2);
+ for(let yy=78;yy<TH;yy+=5){F(yy%10?'#6a4428':'#624026',0,yy,TW,5);F('#4a2e18',0,yy,TW,1);for(let n=0;n<6;n++)F('#5a3a20',(rs()*TW)|0,yy+2,6,1)}
+ F('#7a1e1e',70,90,68,16);F('#9a2a2a',72,92,64,12);F('#c8a040',72,92,64,1);F('#c8a040',72,103,64,1);for(let i=74;i<136;i+=6)F('#b83a3a',i,96,3,4);
+ const bar=(bx,by)=>{F('#6a4022',bx,by,10,14);F('#8a5a30',bx+1,by,8,14);F('#3a3a3a',bx,by+2,10,1);F('#3a3a3a',bx,by+10,10,1);F('#a8784a',bx+3,by+1,3,12)};bar(2,66);bar(12,68);bar(196,64);
+ c._tav=1;return TAV.bg=c}
+function tavTable(x,cx,cy){const F=(col,a,b,w,h)=>{x.fillStyle=col;x.fillRect(a,b,w,h)};x.fillStyle='rgba(0,0,0,.35)';x.beginPath();x.ellipse(cx,cy+9,13,3,0,0,TAU);x.fill();F('#5a361a',cx-1,cy,3,9);x.fillStyle='#8a5a30';x.beginPath();x.ellipse(cx,cy,13,4,0,0,TAU);x.fill();x.fillStyle='#a8703c';x.beginPath();x.ellipse(cx,cy-1,12,3,0,0,TAU);x.fill();
+ F('#e8c060',cx-6,cy-5,3,4);F('#fff8e0',cx-6,cy-6,3,1);F('#d8a040',cx+4,cy-4,3,3);F('#fff8e0',cx+4,cy-5,3,1);F('#8a2a2a',cx-1,cy-3,2,2)}
+const TSEAT=[[30,92],[50,94],[150,94],[172,92],[40,104],[160,104]];const TTAB=[[40,90],[162,90]];
+function tavLook(p){if(p.tm&&p.tm[0]&&p.tm[0].L)return p.tm[0].L;let hsh=0;for(const ch of String(p.id))hsh=(hsh*31+ch.charCodeAt(0))|0;return heroLook({id:Math.abs(hsh),cls:CLS[p.c]?p.c:'warrior',sub:SUB[p.sb]?p.sb:null,eq:{arma:null,elmo:null,armadura:null,anel:null},cos:{}})}
+function tavBart(){if(TAV.bart)return TAV.bart;const L=heroLook({id:777,cls:'monk',sub:null,eq:{arma:null,elmo:null,armadura:null,anel:null},cos:{}});Object.assign(L,{cloth:'#e8e0d0',pants:'#4a3a2a',hair:'#3a2414',skin:'#e8b890',wpn:'adaga'});return TAV.bart=heroFrames(L)}
+function tavStart(){const c=$('#tav');if(!c)return;c.onclick=e=>{const r=c.getBoundingClientRect(),lx=(e.clientX-r.left)/r.width*TW,ly=(e.clientY-r.top)/r.height*TH;const h=TAV.hit.slice().reverse().find(o=>lx>=o.x&&lx<=o.x+o.w&&ly>=o.y&&ly<=o.y+o.h);if(h){SND.play('click');playerCard(h.id)}};
+;if(TAV.run)return;TAV.run=true;
+ const step=()=>{if(!$('#tav')){TAV.run=false;return}try{tavDraw()}catch(e){TAV.run=false;console.error(e);return}requestAnimationFrame(step)};requestAnimationFrame(step)}
+function tavDraw(){const c=$('#tav'),g=guildInfo(S.guild);if(!c||!g)return;const r=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1,KT=Math.max(2,Math.round(r.width*dpr/TW));if(c.width!==TW*KT){c.width=TW*KT;c.height=TH*KT}
+ const x=c.getContext('2d'),t=performance.now()/1000,dt=Math.min(.05,t-(TAV.lt||t));TAV.lt=t;x.setTransform(KT,0,0,KT,0,0);x.imageSmoothingEnabled=false;drawHD(x,tavBg(),0,0,TW,TH,2,1);
+ // fogo da lareira
+ for(let i=0;i<7;i++){const fx=160+i*3.2,h=10+Math.sin(t*9+i*1.7)*3+Math.sin(t*5+i)*2;x.fillStyle=i%2?'#ff6a1a':'#ffa83a';x.fillRect(fx,76-h,3,h);x.fillStyle='#ffe07a';x.fillRect(fx+1,76-h*.55,1,h*.55)}x.fillStyle='#3a2414';x.fillRect(158,74,24,3);
+ // estandarte da guilda
+ x.fillStyle='#1e3a8a';x.fillRect(96,4,16,22);x.beginPath();x.moveTo(96,26);x.lineTo(104,31);x.lineTo(112,26);x.fill();x.fillStyle='#c8a040';x.fillRect(96,4,16,1);x.fillRect(96,4,1,22);x.fillRect(111,4,1,22);x.font='bold 6px "VT323",monospace';x.textAlign='center';x.fillStyle='#ffd34a';x.fillText(String(g.tag||'').slice(0,4).toUpperCase(),104,17);
+ // taberneiro
+ const bF=tavBart();x.save();x.beginPath();x.rect(80,20,40,40);x.clip();drawHD(x,bF.idle[((t*1.5)|0)%2],86,38,32,32);x.restore();
+ TTAB.forEach(([a,b])=>tavTable(x,a,b));
+ // membros
+ const now=Date.now(),mem=g.mem.slice(0,20),ids=new Set(mem.map(p=>p.id));for(const k in TAV.m)if(!ids.has(k))delete TAV.m[k];let seat=0;
+ const list=mem.map(p=>{const on=(p.id===NET.uid)||(p.ts&&now-p.ts<3e5);let m=TAV.m[p.id];if(!m){m=TAV.m[p.id]={x:20+Math.random()*168,y:82+Math.random()*22,tx:0,ty:0,w:Math.random()*2,f:1}}m.on=on;
+  if(!on){const s=TSEAT[seat++%TSEAT.length];m.x=s[0];m.y=s[1];m.tx=m.x;m.ty=m.y}else{if(m.w>0)m.w-=dt;else{const d=Math.hypot(m.tx-m.x,m.ty-m.y);if(d<1.5||!m.tx){m.tx=14+Math.random()*180;m.ty=82+Math.random()*24;m.w=1.5+Math.random()*4}else{const sp=14;m.f=m.tx>m.x?1:-1;m.x+=(m.tx-m.x)/d*sp*dt;m.y+=(m.ty-m.y)/d*sp*dt;m.mv=1}}if(m.w>0)m.mv=0}
+  return{p,m}}).sort((a,b)=>a.m.y-b.m.y);
+ TAV.hit=[];const sc=.85,sz=32*sc;
+ list.forEach(({p,m})=>{const F=heroFrames(tavLook(p)),fr=m.on&&m.mv?F.walk[((t*8)|0)%F.walk.length]:F.idle[((t*2+m.x)|0)%2],dx=m.x-sz/2,dy=m.y-sz+1;
+  x.fillStyle='rgba(0,0,0,.35)';x.beginPath();x.ellipse(m.x,m.y,7,2,0,0,TAU);x.fill();x.globalAlpha=m.on?1:.8;
+  if(m.f<0){x.save();x.translate(m.x+sz/2,dy);x.scale(-1,1);drawHD(x,fr,0,0,sz,sz);x.restore()}else drawHD(x,fr,dx,dy,sz,sz);x.globalAlpha=1;
+  if(!m.on){x.font='5px "VT323",monospace';x.fillStyle='#c8d8ff';const z=(t*.8+m.x)%1;x.globalAlpha=1-z;x.fillText('z',m.x+6+z*3,dy+4-z*6);x.globalAlpha=1}
+  TAV.hit.push({id:p.id,x:dx+4,y:dy,w:sz-8,h:sz});
+  const nm=String(p.n||'?').slice(0,12),lead=g.lead===p.id;x.font='bold 5px "VT323",monospace';x.textAlign='center';const ny=dy+1,tw=x.measureText(nm).width+(lead?6:0)+4;
+  x.fillStyle='rgba(10,6,4,.7)';x.fillRect(m.x-tw/2,ny-5,tw,6);x.fillStyle=p.id===NET.uid?'#ffd34a':m.on?'#e8ffe8':'#a8a8b8';x.fillText((lead?'♛ ':'')+nm,m.x,ny-.5);x.fillStyle=m.on?'#5cd65c':'#6a6a6a';x.fillRect(m.x-tw/2+1,ny-3,1.5,1.5);
+  const td=p.ti&&titDef(p.ti);if(td){x.font='4px "VT323",monospace';x.fillStyle=td.r==='X'?`hsl(${(t*120)%360},100%,70%)`:TRAR[td.r].c;x.fillText('«'+td.n+'»',m.x,ny-6)}});
+ // luz das lamparinas e da lareira
+ x.save();x.globalCompositeOperation='lighter';[[60,14,26],[148,14,26],[170,66,40+Math.sin(t*7)*3]].forEach(([a,b,rr],i)=>{const gg=x.createRadialGradient(a,b,0,a,b,rr);gg.addColorStop(0,i===2?'rgba(255,140,40,.32)':'rgba(255,200,110,.25)');gg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gg;x.fillRect(a-rr,b-rr,rr*2,rr*2)});x.restore();
+ [[60,8],[148,8]].forEach(([a,b])=>{x.fillStyle='#2a1a10';x.fillRect(a,0,1,b);x.fillStyle='#3a3a3a';x.fillRect(a-2,b,5,6);x.fillStyle=`rgb(255,${200+Math.sin(t*6+a)*30},90)`;x.fillRect(a-1,b+1,3,4)});
+ const vg=x.createRadialGradient(TW/2,TH/2,TH*.4,TW/2,TH/2,TH*.95);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.5)');x.fillStyle=vg;x.fillRect(0,0,TW,TH);
+ const on=list.filter(o=>o.m.on).length;x.font='bold 6px "VT323",monospace';x.textAlign='left';x.fillStyle='rgba(0,0,0,.6)';x.fillRect(2,2,52,8);x.fillStyle='#ffd34a';x.fillText(`Taberna · ${on}/${list.length} online`,4,8)}
 
 /* ================= WIKI ================= */
 let wikiOpen='inicio';
@@ -2141,6 +2254,10 @@ function wikiSec(){const cl=Object.keys(CLS).map(k=>{const c=CLS[k];return`<div 
  ['renascer','Renascer e Runas','rune','#a35cff',`<p>A partir do <b>andar 200</b> você pode <b>renascer</b> (Loja › Runas). Você volta à fase 1 e perde ouro, melhorias, níveis, habilidades e subclasses, mas mantém equipamentos, gemas, pets, visuais, troféus e runas, e ganha <b>Essência Rúnica</b>.</p><p>Com a essência você evolui <b>runas específicas</b> no Grimório: Força, Vigor, Bastião, Fortuna, Sabedoria, Sorte, Fúria, Pressa, Precisão, Colheita (limite diário), Ferreiro (forja) e Eternidade (tempo offline).</p>`],
  ['gemas','Gemas, forja e bolsa','gem','#3a8aff',`<p><b>Gemas</b> são a moeda especial: vêm de eventos, chefe da guilda, torre, login, conquistas e bestiário (ou compra no app da loja). Com elas você amplia a <b>bolsa</b> (começa com 40, +10 por compra), compra baús, ovos, chaves e pergaminhos de proteção.</p><p>A <b>forja</b> vai até <b>+15</b>. Até +5 nunca falha; depois a chance cai (15% no +15) e falhar a partir do +10 tira 1 nível, a menos que você use um Pergaminho de Proteção.</p><p>A <b>sorte</b> é difícil: Lendários, Míticos e Antiguidades são muito raros. Melhore com Sorte (Loja), Runa da Sorte e eventos.</p><p>O <b>Mercador viajante</b> (Loja › Viajante) troca o estoque a cada 4h: itens até Épico por ouro, Lendários ou melhores por gemas.</p>`],
  ['eventos','Login, missões e eventos','star','#ffd34a',`<p>Entre todo dia para a <b>recompensa diária</b> (o 7º dia dá um Baú Lendário). Há missões <b>diárias</b> (ouro e chaves) e <b>semanais</b> (gemas e ovos). De sexta a domingo acontece um <b>evento</b> diferente a cada semana (XP em dobro, Chuva de Ouro, Caçada Rara ou Invasão de Chefes), com tarefas que dão gemas e visuais. <b>Conquistas</b> dão gemas e títulos que aparecem no chat e no ranking.</p>`],
+ ['titulos','Títulos','crown','#ff4ad8',`<p>Veja todos em <b>Missões › Títulos</b>. Comuns, raros e épicos vêm das conquistas. <b style="color:#ffb020">Lendários</b> exigem grandes feitos (matar o Senhor dos Dragões, chegar à liga Lenda, +15 na forja...) e dão bônus.</p>
+  <p><b class="c6">Limitados</b> só podem ser ganhos num período ou temporada e nunca mais voltam. Só o título que você está usando dá bônus, e ele aparece no chat, no ranking, no perfil e na taberna.</p>`],
+ ['equipreq','Nível dos equipamentos','gear','#8a94a4',`<p>Todo item mostra <b>Requer Nv X</b>. O herói precisa ter esse nível para equipar. Se o herói perder níveis (ao renascer), itens acima do nível dele ficam enfraquecidos e perdem os efeitos especiais até ele alcançar o nível de novo.</p>`],
+ ['taberna','Taberna da guilda','shield','#3a6ad8',`<p>Ao entrar numa guilda, a <b>taberna</b> aparece em Social › Guilda com todos os membros. Quem está online anda pela taberna; quem está offline fica sentado cochilando. Toque num membro para ver o perfil.</p>`],
  ['arena','Arena PvP','swords','#e2443c',`<p>Em <b>Mapa › Arena</b> você enfrenta a equipe de outros jogadores, controlada pelo jogo. São ${AR_FREE} ingressos grátis por dia (mais ${AR_BUYMAX} por ${AR_BUYP} gemas cada) e 60 segundos por luta.</p>
   <p>Vencer dá pontos (mais pontos contra rivais mais fortes) e ouro. As ligas são ${ARTIERS.map(x=>x.n+' ('+x.r+'+)').join(', ')}. Lutando 3 vezes na semana você pega a <b>recompensa semanal</b> da sua liga. Ouro, Diamante e Lenda dão <b>skins exclusivas</b>.</p>`],
  ['mercado','Mercado entre jogadores','coin','#ffd34a',`<p>Em <b>Loja › Mercado</b> você compra itens Raros ou melhores de outros jogadores pagando em gemas. Para vender, toque num item da Bolsa e escolha <b>Anunciar no Mercado</b>.</p>
